@@ -12,6 +12,10 @@ import ReminderDetail from './pages/ReminderDetail.jsx';
 import Calendar from './pages/Calendar.jsx';
 import Settings from './pages/Settings.jsx';
 import NotFound from './pages/NotFound.jsx';
+import AdminLayout from './pages/admin/AdminLayout.jsx';
+import AdminDashboard from './pages/admin/AdminDashboard.jsx';
+import AdminUsers from './pages/admin/AdminUsers.jsx';
+import AdminReminders from './pages/admin/AdminReminders.jsx';
 import { useEffect } from 'react';
 
 function RequireAuth({ children }) {
@@ -22,6 +26,13 @@ function RequireAuth({ children }) {
 function RequireGuest({ children }) {
   const { isAuthenticated } = useAuthStore();
   return !isAuthenticated ? children : <Navigate to="/dashboard" replace />;
+}
+
+function RequireAdmin({ children }) {
+  const { isAuthenticated, user } = useAuthStore();
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!user?.isAdmin) return <Navigate to="/dashboard" replace />;
+  return children;
 }
 
 export default function App() {
@@ -64,6 +75,12 @@ export default function App() {
           <Route path="/reminders/:id" element={<ReminderDetail />} />
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/settings" element={<Settings />} />
+        </Route>
+
+        <Route path="/admin" element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="reminders" element={<AdminReminders />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

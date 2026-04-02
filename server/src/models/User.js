@@ -58,6 +58,10 @@ const userSchema = new mongoose.Schema(
         default: true,
       },
     },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
     onboardingCompleted: {
       type: Boolean,
       default: false,

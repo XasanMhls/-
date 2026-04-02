@@ -25,3 +25,12 @@ export async function protect(req, res, next) {
     return res.status(401).json({ error: 'Invalid token' });
   }
 }
+
+export async function adminProtect(req, res, next) {
+  await protect(req, res, async () => {
+    if (!req.user.isAdmin) {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+    next();
+  });
+}

@@ -7,6 +7,7 @@ import rateLimit from 'express-rate-limit';
 import { connectDB } from './src/config/db.js';
 import authRoutes from './src/routes/auth.js';
 import reminderRoutes from './src/routes/reminders.js';
+import adminRoutes from './src/routes/admin.js';
 import { errorHandler, notFound } from './src/middleware/errorHandler.js';
 
 const app = express();
@@ -45,6 +46,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/reminders', reminderRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/', (_req, res) => {
   res.json({ status: 'ok', service: 'Chronos API' });
