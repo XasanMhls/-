@@ -14,7 +14,9 @@ const PORT = process.env.PORT || 5000;
 
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: process.env.CLIENT_URL
+    ? process.env.CLIENT_URL.split(',').map(s => s.trim())
+    : ['http://localhost:5173', 'http://localhost:5174'],
   credentials: true,
 }));
 
@@ -45,6 +47,10 @@ if (process.env.NODE_ENV !== 'production') {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/reminders', reminderRoutes);
+
+app.get('/', (_req, res) => {
+  res.json({ status: 'ok', service: 'Chronos API' });
+});
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
