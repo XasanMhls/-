@@ -37,10 +37,21 @@ function RequireAdmin({ children }) {
 
 export default function App() {
   const { theme } = useUiStore();
+  const { isAuthenticated, setAuth, token } = useAuthStore();
 
   useEffect(() => {
     applyTheme(theme);
   }, [theme]);
+
+  // Refresh user data from server on startup to pick up permission changes
+  useEffect(() => {
+    if (!isAuthenticated || !token) return;
+    import('./services/authService.js').then(({ authService }) => {
+      authService.getMe().then(({ user }) => {
+        useAuthStore.getState().setAuth(user, token);
+      }).catch(() => {});
+    });
+  }, []);
 
   return (
     <>
