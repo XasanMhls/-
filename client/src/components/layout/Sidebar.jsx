@@ -20,7 +20,7 @@ export default function Sidebar() {
   const { sidebarOpen, toggleSidebar, setSidebarOpen } = useUiStore();
   const location = useLocation();
 
-  const W = sidebarOpen ? 232 : 60;
+  const W = sidebarOpen ? 232 : (window.innerWidth < 768 ? 0 : 60);
 
   return (
     <motion.aside

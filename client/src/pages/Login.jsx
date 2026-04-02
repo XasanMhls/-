@@ -36,7 +36,7 @@ export default function Login() {
       background: 'var(--bg-canvas)',
     }}>
       {/* Top bar */}
-      <header style={{
+      <header className="auth-header" style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -66,9 +66,9 @@ export default function Login() {
             Chronos
           </span>
         </Link>
-        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>
-          {t('auth.noAccount')}{' '}
-          <Link to="/register" style={{ color: 'var(--accent)', fontWeight: 500 }}>
+        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+          <span className="auth-header-hint">{t('auth.noAccount')}</span>
+          <Link to="/register" style={{ color: 'var(--accent)', fontWeight: 500, whiteSpace: 'nowrap' }}>
             {t('auth.register')}
           </Link>
         </p>

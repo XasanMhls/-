@@ -239,9 +239,7 @@ export default function Landing() {
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-lg)',
-            overflow: 'hidden',
+            gap: 12,
           }}>
             {FEATURES.map(({ icon: Icon, title, body }, i) => (
               <motion.div
@@ -252,8 +250,8 @@ export default function Landing() {
                 style={{
                   padding: '28px 24px',
                   background: 'var(--bg-surface)',
-                  borderRight: (i % 2 === 0) ? '1px solid var(--border)' : 'none',
-                  borderBottom: (i < 2) ? '1px solid var(--border)' : 'none',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius-lg)',
                   transition: 'background var(--t-fast)',
                 }}
                 onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface-2)'}

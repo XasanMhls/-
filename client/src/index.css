@@ -474,6 +474,26 @@ img, svg { display: block; }
   .landing-footer {
     padding: 16px 20px !important;
   }
+
+  /* Auth header padding */
+  .auth-header {
+    padding: 0 16px !important;
+  }
+
+  /* Auth header text — hide verbose part, keep link */
+  .auth-header-hint {
+    display: none !important;
+  }
+
+  /* Dashboard greeting size */
+  .dashboard-greeting {
+    font-size: var(--text-xl) !important;
+  }
+}
+
+/* ---------- Auth header (login/register pages) ---------- */
+.auth-header {
+  padding: 0 40px;
 }
 
 /* Hide/show helpers */
