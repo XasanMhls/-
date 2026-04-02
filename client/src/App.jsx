@@ -17,6 +17,7 @@ import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import AdminUsers from './pages/admin/AdminUsers.jsx';
 import AdminReminders from './pages/admin/AdminReminders.jsx';
 import { useEffect } from 'react';
+import { unlockAudio } from './voice/soundEngine.js';
 
 function RequireAuth({ children }) {
   const { isAuthenticated } = useAuthStore();
@@ -42,6 +43,21 @@ export default function App() {
   useEffect(() => {
     applyTheme(theme);
   }, [theme]);
+
+  // Unlock AudioContext on first user interaction (required on iOS/Android)
+  useEffect(() => {
+    const unlock = () => {
+      unlockAudio();
+      document.removeEventListener('touchstart', unlock);
+      document.removeEventListener('mousedown', unlock);
+    };
+    document.addEventListener('touchstart', unlock, { passive: true });
+    document.addEventListener('mousedown', unlock);
+    return () => {
+      document.removeEventListener('touchstart', unlock);
+      document.removeEventListener('mousedown', unlock);
+    };
+  }, []);
 
   // Refresh user data from server on startup to pick up permission changes
   useEffect(() => {

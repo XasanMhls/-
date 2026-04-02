@@ -18,6 +18,12 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    // Unlock speech synthesis on iOS/Android (must happen inside user gesture)
+    if (window.speechSynthesis) {
+      const unlock = new SpeechSynthesisUtterance(' ');
+      unlock.volume = 0;
+      window.speechSynthesis.speak(unlock);
+    }
     setLoading(true);
     try {
       await login(form);

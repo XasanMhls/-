@@ -22,6 +22,12 @@ export default function Register() {
       setError('Password must be at least 6 characters');
       return;
     }
+    // Unlock speech synthesis on iOS/Android (must happen inside user gesture)
+    if (window.speechSynthesis) {
+      const unlock = new SpeechSynthesisUtterance(' ');
+      unlock.volume = 0;
+      window.speechSynthesis.speak(unlock);
+    }
     setLoading(true);
     try {
       await register(form);
