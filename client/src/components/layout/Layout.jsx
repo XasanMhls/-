@@ -9,12 +9,10 @@ export default function Layout() {
 
   useReminderScheduler();
 
-  // Apply theme on mount and when it changes
   useEffect(() => {
     applyTheme(theme);
   }, [theme]);
 
-  // Listen to system theme changes
   useEffect(() => {
     if (theme !== 'system') return;
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
@@ -23,7 +21,6 @@ export default function Layout() {
     return () => mq.removeEventListener('change', handler);
   }, [theme]);
 
-  // Collapse sidebar on mobile
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) setSidebarOpen(false);
@@ -34,14 +31,17 @@ export default function Layout() {
   }, [setSidebarOpen]);
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        minHeight: '100dvh',
-        background: 'var(--bg-canvas)',
-      }}
-    >
+    <div style={{ display: 'flex', minHeight: '100dvh', background: 'var(--bg-canvas)', position: 'relative' }}>
+      {/* Mobile backdrop */}
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          className="mobile-backdrop"
+        />
+      )}
+
       <Sidebar />
+
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
         <Outlet />
       </div>

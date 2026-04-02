@@ -116,7 +116,7 @@ export default function Dashboard() {
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
       <Header title={t('dashboard.title')} onAddClick={() => setCreateOpen(true)} />
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '28px 28px' }}>
+      <div className="inner-page-content" style={{ flex: 1, overflowY: 'auto', padding: '28px 28px' }}>
 
         {/* Greeting */}
         <motion.div
@@ -134,6 +134,7 @@ export default function Dashboard() {
 
         {/* Stats grid */}
         <div
+          className="stats-grid"
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',

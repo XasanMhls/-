@@ -142,7 +142,7 @@ export default function Settings() {
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       <Header title={t('settings.title')} />
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', maxWidth: 720 }}>
+      <div className="settings-content" style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', maxWidth: 720 }}>
 
         {/* Profile */}
         <Section title={t('settings.profile')} icon={User}>

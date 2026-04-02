@@ -69,6 +69,7 @@ export default function Header({ title, onAddClick }) {
 
       {/* Search */}
       <div
+        className="header-search"
         style={{
           flex: 1,
           maxWidth: 400,
@@ -140,9 +141,29 @@ export default function Header({ title, onAddClick }) {
 
       {/* Add button */}
       {onAddClick && (
-        <Button size="sm" onClick={onAddClick} icon={<Plus size={16} />}>
-          {t('reminder.new')}
-        </Button>
+        <>
+          <Button size="sm" onClick={onAddClick} icon={<Plus size={16} />} className="hide-on-mobile">
+            {t('reminder.new')}
+          </Button>
+          <button
+            onClick={onAddClick}
+            className="show-on-mobile"
+            style={{
+              display: 'none',
+              width: 34,
+              height: 34,
+              borderRadius: 'var(--radius-md)',
+              background: 'var(--accent)',
+              color: 'white',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              flexShrink: 0,
+            }}
+          >
+            <Plus size={17} />
+          </button>
+        </>
       )}
     </header>
   );

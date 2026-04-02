@@ -11,20 +11,38 @@ export function useAuth() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
+  const greet = useCallback((userName, lang = 'ru') => {
+    if (!window.speechSynthesis) return;
+    const firstName = userName?.split(' ')[0] || '';
+    const messages = {
+      ru: `Добро пожаловать, ${firstName}!`,
+      en: `Welcome, ${firstName}!`,
+      uz: `Xush kelibsiz, ${firstName}!`,
+    };
+    const msg = new SpeechSynthesisUtterance(messages[lang] || messages.ru);
+    msg.lang = lang === 'uz' ? 'uz-UZ' : lang === 'en' ? 'en-US' : 'ru-RU';
+    msg.volume = 1;
+    msg.rate = 0.95;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(msg);
+  }, []);
+
   const login = useCallback(async (credentials) => {
     const { user, token } = await authService.login(credentials);
     setAuth(user, token);
-    if (user.preferences?.language) {
-      setLanguage(user.preferences.language);
-    }
+    const lang = user.preferences?.language || 'ru';
+    if (user.preferences?.language) setLanguage(lang);
+    setTimeout(() => greet(user.name, lang), 400);
     navigate('/dashboard');
-  }, [setAuth, navigate]);
+  }, [setAuth, navigate, greet]);
 
   const register = useCallback(async (data) => {
     const { user, token } = await authService.register(data);
     setAuth(user, token);
+    const lang = user.preferences?.language || 'ru';
+    setTimeout(() => greet(user.name, lang), 400);
     navigate('/dashboard');
-  }, [setAuth, navigate]);
+  }, [setAuth, navigate, greet]);
 
   const logout = useCallback(() => {
     clearAuth();

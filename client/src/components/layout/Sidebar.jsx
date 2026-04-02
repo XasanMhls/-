@@ -17,7 +17,7 @@ const NAV_ITEMS = [
 export default function Sidebar() {
   const { t } = useTranslation();
   const { logout, user } = useAuth();
-  const { sidebarOpen, toggleSidebar } = useUiStore();
+  const { sidebarOpen, toggleSidebar, setSidebarOpen } = useUiStore();
   const location = useLocation();
 
   const W = sidebarOpen ? 232 : 60;
@@ -26,10 +26,9 @@ export default function Sidebar() {
     <motion.aside
       animate={{ width: W }}
       transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+      className="sidebar"
       style={{
         height: '100dvh',
-        position: 'sticky',
-        top: 0,
         display: 'flex',
         flexDirection: 'column',
         background: 'var(--bg-surface)',
@@ -115,6 +114,7 @@ export default function Sidebar() {
             <NavLink
               key={to}
               to={to}
+              onClick={() => { if (window.innerWidth < 768) setSidebarOpen(false); }}
               style={{
                 position: 'relative',
                 display: 'flex',

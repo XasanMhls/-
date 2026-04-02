@@ -40,7 +40,7 @@ export default function Landing() {
     <div style={{ minHeight: '100dvh', background: 'var(--bg-canvas)', display: 'flex', flexDirection: 'column' }}>
 
       {/* Nav */}
-      <header style={{
+      <header className="landing-header" style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -109,7 +109,7 @@ export default function Landing() {
       </header>
 
       {/* Hero */}
-      <section style={{
+      <section className="landing-hero" style={{
         maxWidth: 760,
         margin: '0 auto',
         padding: '100px 24px 80px',
@@ -212,7 +212,7 @@ export default function Landing() {
       </section>
 
       {/* Features */}
-      <section style={{ borderTop: '1px solid var(--border)', padding: '72px 40px', background: 'var(--bg-surface)' }}>
+      <section className="landing-features" style={{ borderTop: '1px solid var(--border)', padding: '72px 40px', background: 'var(--bg-surface)' }}>
         <div style={{ maxWidth: 1040, margin: '0 auto' }}>
           <p style={{
             fontSize: 'var(--text-xs)',
@@ -284,7 +284,7 @@ export default function Landing() {
       </section>
 
       {/* CTA strip */}
-      <section style={{
+      <section className="landing-cta" style={{
         borderTop: '1px solid var(--border)',
         padding: '56px 40px',
         display: 'flex',
@@ -327,7 +327,7 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer style={{
+      <footer className="landing-footer" style={{
         borderTop: '1px solid var(--border)',
         padding: '20px 40px',
         display: 'flex',

@@ -49,7 +49,7 @@ export default function Reminders() {
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       <Header title={t('nav.reminders')} onAddClick={() => setCreateOpen(true)} />
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div className="inner-page-content" style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
 
         {/* Filters + view toggle */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
@@ -122,13 +122,10 @@ export default function Reminders() {
         ) : (
           <motion.div
             layout
+            className={viewMode === 'grid' ? 'reminders-grid' : ''}
             style={{
-              display: viewMode === 'grid'
-                ? 'grid'
-                : 'flex',
-              gridTemplateColumns: viewMode === 'grid'
-                ? 'repeat(auto-fill, minmax(300px, 1fr))'
-                : undefined,
+              display: viewMode === 'grid' ? 'grid' : 'flex',
+              gridTemplateColumns: viewMode === 'grid' ? 'repeat(auto-fill, minmax(300px, 1fr))' : undefined,
               flexDirection: viewMode === 'list' ? 'column' : undefined,
               gap: 12,
             }}
@@ -157,6 +154,7 @@ export default function Reminders() {
           position: 'fixed',
           bottom: 28,
           right: 28,
+          // fab class handles mobile position override
           width: 52,
           height: 52,
           borderRadius: '50%',
