@@ -533,11 +533,55 @@ img, svg { display: block; }
   .show-on-mobile { display: flex !important; }
 }
 
-/* Landing CTA banner mobile margin */
+/* ── New Landing responsive ── */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .landing-nav-links { display: none !important; }
+  .landing-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .landing-stats-grid > *:nth-child(2) { border-right: 1px solid rgba(255,255,255,0.06) !important; }
+  .landing-stats-grid > *:nth-child(3) { border-right: none !important; }
+  .landing-footer-grid { grid-template-columns: 1fr 1fr !important; }
+}
+
+/* Mobile */
 @media (max-width: 768px) {
-  .landing-cta-banner {
-    margin: 0 16px 60px !important;
-    padding: 48px 24px !important;
+  .landing-header         { padding: 0 16px !important; }
+  .landing-hero           { padding: 80px 20px 64px !important; }
+  .landing-features       { padding: 64px 20px !important; }
+  .landing-cta-banner     { margin: 0 16px 56px !important; padding: 48px 24px !important; border-radius: 16px !important; }
+  .landing-footer         { padding: 32px 20px !important; }
+
+  .landing-nav-auth       { gap: 6px !important; }
+  .landing-nav-auth .nav-login { display: none !important; }
+  .landing-lang-switcher  { display: none !important; }
+
+  .landing-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .landing-stats-grid > * {
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+  }
+  .landing-stats-grid > *:nth-child(odd)  { border-right: 1px solid rgba(255,255,255,0.06) !important; }
+  .landing-stats-grid > *:nth-child(3),
+  .landing-stats-grid > *:nth-child(4)    { border-bottom: none !important; }
+
+  .landing-footer-grid {
+    grid-template-columns: 1fr !important;
+    gap: 28px !important;
+  }
+  .landing-app-preview  { display: none !important; }
+  .landing-preview-section { padding: 0 !important; display: none !important; }
+
+  .landing-how-grid { gap: 16px !important; }
+  .landing-testimonials-grid { grid-template-columns: 1fr !important; }
+}
+
+/* Small phones */
+@media (max-width: 400px) {
+  .landing-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 }
 

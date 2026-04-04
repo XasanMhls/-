@@ -268,7 +268,7 @@ export default function Landing() {
         background: 'rgba(8,9,15,0.85)',
         backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)',
         borderBottom: '1px solid rgba(255,255,255,0.06)',
-      }}>
+      }} id="top">
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
           <div style={{ width: 38, height: 38, borderRadius: 10, background: 'linear-gradient(135deg,#7c6af5,#a78bfa)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 24px rgba(124,106,245,0.5)' }}>
             <Clock size={18} color="#fff" strokeWidth={2.5} />
@@ -277,15 +277,17 @@ export default function Landing() {
         </Link>
 
         <nav style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          {[['#features','Функции'],['#how','Как работает'],['#faq','FAQ']].map(([href, label]) => (
-            <a key={href} href={href} style={{ padding: '8px 16px', fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.5)', borderRadius: 8, textDecoration: 'none', transition: 'color 150ms, background 150ms' }}
-              onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; }}
-              onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; e.currentTarget.style.background = 'transparent'; }}
-            >{label}</a>
-          ))}
+          <span className="landing-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            {[['#features','Функции'],['#how','Как работает'],['#faq','FAQ']].map(([href, label]) => (
+              <a key={href} href={href} style={{ padding: '8px 16px', fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.5)', borderRadius: 8, textDecoration: 'none', transition: 'color 150ms, background 150ms' }}
+                onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; e.currentTarget.style.background = 'transparent'; }}
+              >{label}</a>
+            ))}
+          </span>
 
           {/* Language switcher */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: 8, border: '1px solid rgba(255,255,255,0.08)', margin: '0 6px' }}>
+          <div className="landing-lang-switcher" style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: 8, border: '1px solid rgba(255,255,255,0.08)', margin: '0 6px' }}>
             {[['ru','RU'],['en','EN'],['uz','UZ']].map(([code, label]) => {
               const active = i18n.language === code;
               return (
@@ -304,7 +306,7 @@ export default function Landing() {
               );
             })}
           </div>
-          <Link to="/login" style={{ padding: '8px 18px', fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.55)', borderRadius: 8, textDecoration: 'none', transition: 'color 150ms, background 150ms' }}
+          <Link to="/login" className="nav-login" style={{ padding: '8px 18px', fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.55)', borderRadius: 8, textDecoration: 'none', transition: 'color 150ms, background 150ms' }}
             onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; }}
             onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; e.currentTarget.style.background = 'transparent'; }}
           >
@@ -379,7 +381,7 @@ export default function Landing() {
 
       {/* ══ STATS ══ */}
       <div style={{ position: 'relative', zIndex: 1, borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.018)' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4,1fr)' }}>
+        <div className="landing-stats-grid" style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4,1fr)' }}>
           {STATS.map(({ n, label }, i) => (
             <motion.div key={label} {...vu(i * 0.08)} style={{ padding: '38px 16px', textAlign: 'center', borderRight: i < 3 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
               <div style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 46, fontWeight: 700, letterSpacing: '-0.05em', lineHeight: 1, background: 'linear-gradient(135deg,#fff 20%,#a78bfa 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{n}</div>
@@ -390,7 +392,7 @@ export default function Landing() {
       </div>
 
       {/* ══ APP PREVIEW ══ */}
-      <section id="preview" style={{ position: 'relative', zIndex: 1, padding: '110px 40px' }}>
+      <section id="preview" className="landing-preview-section" style={{ position: 'relative', zIndex: 1, padding: '110px 40px' }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           <motion.div {...vu()} style={{ textAlign: 'center', marginBottom: 64 }}>
             <SectionBadge color="#38bdf8" bg="rgba(56,189,248,0.1)" border="rgba(56,189,248,0.2)">
@@ -475,7 +477,7 @@ export default function Landing() {
             <SectionH2>Что говорят пользователи</SectionH2>
           </motion.div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 16 }}>
+          <div className="landing-testimonials-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 16 }}>
             {TESTIMONIALS.map(({ name, role, text }, i) => (
               <motion.div key={name} {...vu(i * 0.1)} style={{ padding: '32px 28px', borderRadius: 16, background: 'rgba(255,255,255,0.022)', border: '1px solid rgba(255,255,255,0.07)', position: 'relative' }}>
                 <div style={{ display: 'flex', gap: 3, marginBottom: 16 }}>
@@ -566,7 +568,7 @@ export default function Landing() {
       </section>
 
       {/* ══ FOOTER ══ */}
-      <footer className="landing-footer" style={{ position: 'relative', zIndex: 1, borderTop: '1px solid rgba(255,255,255,0.06)', padding: '40px 56px', display: 'grid', gridTemplateColumns: '1fr auto auto auto', alignItems: 'start', gap: 40, background: 'rgba(8,9,15,0.9)', backdropFilter: 'blur(20px)' }}>
+      <footer className="landing-footer landing-footer-grid" style={{ position: 'relative', zIndex: 1, borderTop: '1px solid rgba(255,255,255,0.06)', padding: '40px 56px', display: 'grid', gridTemplateColumns: '1fr auto auto auto', alignItems: 'start', gap: 40, background: 'rgba(8,9,15,0.9)', backdropFilter: 'blur(20px)' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
             <div style={{ width: 30, height: 30, borderRadius: 8, background: 'linear-gradient(135deg,#7c6af5,#a78bfa)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
