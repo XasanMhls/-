@@ -533,56 +533,95 @@ img, svg { display: block; }
   .show-on-mobile { display: flex !important; }
 }
 
-/* ── New Landing responsive ── */
+/* ══════════════════════════════════════════
+   RESPONSIVE — Landing + App (full rewrite)
+   ══════════════════════════════════════════ */
 
-/* Tablet */
-@media (max-width: 1024px) {
-  .landing-nav-links { display: none !important; }
-  .landing-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
-  .landing-stats-grid > *:nth-child(2) { border-right: 1px solid rgba(255,255,255,0.06) !important; }
-  .landing-stats-grid > *:nth-child(3) { border-right: none !important; }
-  .landing-footer-grid { grid-template-columns: 1fr 1fr !important; }
+/* ── Modal mobile: bottom-sheet ── */
+@media (max-width: 640px) {
+  /* Move modal to bottom of screen */
+  .modal-inner {
+    position: fixed !important;
+    inset: auto 0 0 0 !important;
+    max-width: 100% !important;
+    border-radius: 20px 20px 0 0 !important;
+    max-height: 92dvh !important;
+  }
 }
 
-/* Mobile */
+/* ── Tablet ≤ 1024px ── */
+@media (max-width: 1024px) {
+  .landing-nav-links { display: none !important; }
+
+  .landing-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .landing-stats-grid > *:nth-child(2) { border-right: 1px solid rgba(255,255,255,0.06) !important; }
+  .landing-stats-grid > *:nth-child(3) { border-right: none !important; border-top: 1px solid rgba(255,255,255,0.06) !important; }
+  .landing-stats-grid > *:nth-child(4) { border-top: 1px solid rgba(255,255,255,0.06) !important; }
+
+  .landing-footer-grid { grid-template-columns: 1fr 1fr !important; gap: 32px !important; }
+}
+
+/* ── Mobile ≤ 768px ── */
 @media (max-width: 768px) {
-  .landing-header         { padding: 0 16px !important; }
-  .landing-hero           { padding: 80px 20px 64px !important; }
-  .landing-features       { padding: 64px 20px !important; }
-  .landing-cta-banner     { margin: 0 16px 56px !important; padding: 48px 24px !important; border-radius: 16px !important; }
-  .landing-footer         { padding: 32px 20px !important; }
-
-  .landing-nav-auth       { gap: 6px !important; }
-  .landing-nav-auth .nav-login { display: none !important; }
+  /* ─ Landing ─ */
+  .landing-header         { padding: 0 16px !important; height: 60px !important; }
+  .landing-hero           { padding: 72px 20px 56px !important; }
+  .landing-features       { padding: 60px 20px !important; }
+  .landing-cta-banner     { margin: 0 12px 56px !important; padding: 44px 20px !important; border-radius: 14px !important; }
+  .landing-footer         { padding: 28px 20px !important; }
+  .landing-preview-section { display: none !important; }
   .landing-lang-switcher  { display: none !important; }
+  .nav-login              { display: none !important; }
+  .landing-mobile-menu-btn { display: flex !important; }
 
-  .landing-stats-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-  .landing-stats-grid > * {
-    border-right: none !important;
-    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
-  }
+  .landing-stats-grid { grid-template-columns: repeat(2,1fr) !important; }
+  .landing-stats-grid > * { border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.06) !important; }
   .landing-stats-grid > *:nth-child(odd)  { border-right: 1px solid rgba(255,255,255,0.06) !important; }
   .landing-stats-grid > *:nth-child(3),
   .landing-stats-grid > *:nth-child(4)    { border-bottom: none !important; }
 
-  .landing-footer-grid {
-    grid-template-columns: 1fr !important;
-    gap: 28px !important;
-  }
-  .landing-app-preview  { display: none !important; }
-  .landing-preview-section { padding: 0 !important; display: none !important; }
-
-  .landing-how-grid { gap: 16px !important; }
+  .landing-footer-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
   .landing-testimonials-grid { grid-template-columns: 1fr !important; }
+
+  /* ─ App inner pages ─ */
+  .inner-page-content { padding: 14px 14px !important; }
+
+  /* Stats: 2 columns on dashboard */
+  .stats-grid { grid-template-columns: repeat(2,1fr) !important; }
+
+  /* Reminders: single column */
+  .reminders-grid { grid-template-columns: 1fr !important; }
+
+  /* Header search: hidden */
+  .header-search { display: none !important; }
+
+  /* Sidebar: fixed drawer */
+  .sidebar {
+    position: fixed !important;
+    top: 0; left: 0;
+    height: 100dvh !important;
+    z-index: 10 !important;
+  }
+
+  /* Auth header padding */
+  .auth-header { padding: 0 16px !important; }
+  .auth-header-hint { display: none !important; }
+
+  /* Dashboard greeting */
+  .dashboard-greeting { font-size: var(--text-xl) !important; }
+
+  /* FAB */
+  .fab { bottom: 20px !important; right: 16px !important; }
+
+  /* Settings */
+  .settings-content { max-width: 100% !important; padding: 14px !important; }
 }
 
-/* Small phones */
+/* ── Small phones ≤ 400px ── */
 @media (max-width: 400px) {
-  .landing-stats-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
+  .stats-grid      { grid-template-columns: 1fr !important; }
+  .landing-stats-grid { grid-template-columns: repeat(2,1fr) !important; }
+  .landing-hero    { padding: 60px 16px 48px !important; }
 }
 
 /* Very small phones */

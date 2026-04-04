@@ -6,7 +6,7 @@ import { setLanguage } from '../i18n/index.js';
 import {
   Volume2, Globe, Repeat, Bell, Clock, ArrowRight, CheckCircle,
   Zap, Shield, Calendar, BarChart2, Layers, Mic,
-  ChevronDown, Star, Play, Sparkles,
+  ChevronDown, Star, Play, Sparkles, Menu, X,
 } from 'lucide-react';
 
 /* ─── data ──────────────────────────────────────────────── */
@@ -211,6 +211,7 @@ function FaqItem({ q, a }) {
 /* ─── main component ─────────────────────────────────────── */
 export default function Landing() {
   const { t, i18n } = useTranslation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Mouse-following cursor glow
   const cursorGlowRef = useRef(null);
@@ -318,8 +319,58 @@ export default function Landing() {
           >
             {t('auth.register')} <ArrowRight size={14} strokeWidth={2.5} />
           </Link>
+
+          {/* Hamburger — mobile only */}
+          <button
+            className="landing-mobile-menu-btn"
+            onClick={() => setMobileMenuOpen(o => !o)}
+            style={{ display: 'none', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, borderRadius: 8, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', cursor: 'pointer', flexShrink: 0 }}
+          >
+            {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
         </nav>
       </header>
+
+      {/* Mobile menu overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              position: 'fixed', top: 60, left: 0, right: 0, zIndex: 99,
+              background: 'rgba(8,9,15,0.97)',
+              backdropFilter: 'blur(24px)',
+              borderBottom: '1px solid rgba(255,255,255,0.08)',
+              padding: '20px 20px 24px',
+              display: 'flex', flexDirection: 'column', gap: 8,
+            }}
+          >
+            {[['#features','Функции'],['#how','Как работает'],['#faq','FAQ']].map(([href, label]) => (
+              <a key={href} href={href} onClick={() => setMobileMenuOpen(false)} style={{ padding: '12px 16px', fontSize: 16, fontWeight: 600, color: 'rgba(255,255,255,0.75)', borderRadius: 10, textDecoration: 'none', background: 'rgba(255,255,255,0.04)' }}>{label}</a>
+            ))}
+            <Link to="/login" onClick={() => setMobileMenuOpen(false)} style={{ padding: '12px 16px', fontSize: 16, fontWeight: 600, color: 'rgba(255,255,255,0.75)', borderRadius: 10, textDecoration: 'none', background: 'rgba(255,255,255,0.04)' }}>
+              {t('auth.login')}
+            </Link>
+            <Link to="/register" onClick={() => setMobileMenuOpen(false)} style={{ padding: '13px 16px', fontSize: 16, fontWeight: 700, color: '#fff', borderRadius: 10, textDecoration: 'none', background: 'linear-gradient(135deg,#7c6af5,#9d8df8)', textAlign: 'center', marginTop: 4 }}>
+              {t('auth.register')}
+            </Link>
+            {/* Language switcher in mobile menu */}
+            <div style={{ display: 'flex', gap: 8, marginTop: 8, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+              {[['ru','RU'],['en','EN'],['uz','UZ']].map(([code, label]) => {
+                const active = i18n.language === code;
+                return (
+                  <button key={code} onClick={() => setLanguage(code)} style={{ flex: 1, padding: '10px', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: 'pointer', border: 'none', background: active ? 'rgba(124,106,245,0.8)' : 'rgba(255,255,255,0.06)', color: active ? '#fff' : 'rgba(255,255,255,0.5)' }}>
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ══ HERO ══ */}
       <section className="landing-hero" style={{ position: 'relative', zIndex: 1, padding: '130px 24px 110px', textAlign: 'center', maxWidth: 980, margin: '0 auto', width: '100%' }}>

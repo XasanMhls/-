@@ -62,6 +62,7 @@ export default function Modal({
             }}
           >
             <div
+              className="modal-inner"
               onClick={(e) => e.stopPropagation()}
               style={{
                 width: '100%',
