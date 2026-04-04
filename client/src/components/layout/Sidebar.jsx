@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LayoutDashboard, Bell, Calendar, Settings, LogOut, ChevronLeft, Clock,
+  LayoutDashboard, Bell, Calendar, Settings, LogOut, ChevronLeft, Clock, Shield,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth.js';
@@ -20,7 +20,7 @@ export default function Sidebar() {
   const { sidebarOpen, toggleSidebar, setSidebarOpen } = useUiStore();
   const location = useLocation();
 
-  const W = sidebarOpen ? 232 : (window.innerWidth < 768 ? 0 : 60);
+  const W = sidebarOpen ? 236 : (window.innerWidth < 768 ? 0 : 62);
 
   return (
     <motion.aside
@@ -40,24 +40,25 @@ export default function Sidebar() {
     >
       {/* Logo */}
       <div style={{
-        height: 56,
+        height: 58,
         display: 'flex',
         alignItems: 'center',
-        padding: sidebarOpen ? '0 16px' : '0',
+        padding: sidebarOpen ? '0 14px' : '0',
         justifyContent: sidebarOpen ? 'space-between' : 'center',
         borderBottom: '1px solid var(--border)',
         flexShrink: 0,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 9, overflow: 'hidden' }}>
           <div style={{
-            width: 28,
-            height: 28,
-            borderRadius: 7,
-            background: 'var(--accent)',
+            width: 30,
+            height: 30,
+            borderRadius: 8,
+            background: 'linear-gradient(135deg, #6c63ff, #a78bfa)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
+            boxShadow: '0 4px 16px rgba(108,99,255,0.35)',
           }}>
             <Clock size={14} color="white" strokeWidth={2.5} />
           </div>
@@ -71,8 +72,8 @@ export default function Sidebar() {
                 style={{
                   fontFamily: 'var(--font-display)',
                   fontSize: 16,
-                  fontWeight: 700,
-                  letterSpacing: '-0.02em',
+                  fontWeight: 800,
+                  letterSpacing: '-0.03em',
                   color: 'var(--text-primary)',
                   whiteSpace: 'nowrap',
                 }}
@@ -98,8 +99,8 @@ export default function Sidebar() {
               transition: 'background 150ms ease, color 150ms ease',
               flexShrink: 0,
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-surface-2)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-surface-2)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; }}
           >
             <ChevronLeft size={15} />
           </button>
@@ -124,7 +125,7 @@ export default function Sidebar() {
                 justifyContent: sidebarOpen ? 'flex-start' : 'center',
                 borderRadius: 'var(--radius-md)',
                 textDecoration: 'none',
-                fontWeight: isActive ? 500 : 400,
+                fontWeight: isActive ? 600 : 400,
                 fontSize: 'var(--text-sm)',
                 color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
                 background: 'transparent',
@@ -132,12 +133,8 @@ export default function Sidebar() {
                 overflow: 'hidden',
                 transition: 'color 150ms ease',
               }}
-              onMouseEnter={(e) => {
-                if (!isActive) e.currentTarget.style.color = 'var(--text-secondary)';
-              }}
-              onMouseLeave={(e) => {
-                if (!isActive) e.currentTarget.style.color = 'var(--text-muted)';
-              }}
+              onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = 'var(--text-secondary)'; }}
+              onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = 'var(--text-muted)'; }}
             >
               {isActive && (
                 <motion.span
@@ -147,13 +144,21 @@ export default function Sidebar() {
                     position: 'absolute',
                     inset: 0,
                     borderRadius: 'var(--radius-md)',
-                    background: 'var(--bg-surface-3)',
-                    border: '1px solid var(--border)',
+                    background: 'linear-gradient(135deg, rgba(108,99,255,0.15) 0%, rgba(108,99,255,0.06) 100%)',
+                    border: '1px solid rgba(108,99,255,0.22)',
                     zIndex: 0,
                   }}
                 />
               )}
-              <Icon size={16} style={{ flexShrink: 0, position: 'relative', zIndex: 1 }} />
+              <Icon
+                size={16}
+                style={{
+                  flexShrink: 0,
+                  position: 'relative',
+                  zIndex: 1,
+                  color: isActive ? 'var(--accent)' : 'inherit',
+                }}
+              />
               <AnimatePresence>
                 {sidebarOpen && (
                   <motion.span
@@ -170,6 +175,54 @@ export default function Sidebar() {
             </NavLink>
           );
         })}
+
+        {/* Admin link */}
+        {user?.isAdmin && (() => {
+          const isActive = location.pathname.startsWith('/admin');
+          return (
+            <NavLink
+              to="/admin"
+              onClick={() => { if (window.innerWidth < 768) setSidebarOpen(false); }}
+              style={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 9,
+                padding: sidebarOpen ? '8px 10px' : '8px',
+                justifyContent: sidebarOpen ? 'flex-start' : 'center',
+                borderRadius: 'var(--radius-md)',
+                textDecoration: 'none',
+                fontWeight: isActive ? 600 : 400,
+                fontSize: 'var(--text-sm)',
+                color: isActive ? 'var(--accent)' : 'var(--text-muted)',
+                background: isActive ? 'var(--accent-subtle)' : 'transparent',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                transition: 'color 150ms ease, background 150ms ease',
+                marginTop: 8,
+                borderTop: '1px solid var(--border)',
+                paddingTop: 10,
+              }}
+              onMouseEnter={e => { if (!isActive) { e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.background = 'var(--accent-subtle)'; } }}
+              onMouseLeave={e => { if (!isActive) { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.background = 'transparent'; } }}
+            >
+              <Shield size={16} style={{ flexShrink: 0, position: 'relative', zIndex: 1 }} />
+              <AnimatePresence>
+                {sidebarOpen && (
+                  <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.12 }}
+                    style={{ position: 'relative', zIndex: 1 }}
+                  >
+                    Admin Panel
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </NavLink>
+          );
+        })()}
       </nav>
 
       {/* User + Logout */}
@@ -184,22 +237,23 @@ export default function Sidebar() {
             marginBottom: 2,
           }}>
             <div style={{
-              width: 28,
-              height: 28,
+              width: 30,
+              height: 30,
               borderRadius: '50%',
-              background: 'var(--accent)',
+              background: 'linear-gradient(135deg, #6c63ff, #a78bfa)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: 'white',
-              fontWeight: 700,
+              fontWeight: 800,
               fontSize: 12,
               flexShrink: 0,
+              boxShadow: '0 2px 10px rgba(108,99,255,0.35)',
             }}>
               {user.name?.[0]?.toUpperCase() || '?'}
             </div>
             <div style={{ overflow: 'hidden' }}>
-              <div style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {user.name}
               </div>
               <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -225,14 +279,8 @@ export default function Sidebar() {
             cursor: 'pointer',
             transition: 'background 150ms ease, color 150ms ease',
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'var(--danger-subtle)';
-            e.currentTarget.style.color = 'var(--danger)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'transparent';
-            e.currentTarget.style.color = 'var(--text-muted)';
-          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'var(--danger-subtle)'; e.currentTarget.style.color = 'var(--danger)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; }}
         >
           <LogOut size={16} style={{ flexShrink: 0 }} />
           <AnimatePresence>

@@ -25,7 +25,7 @@
 
   /* Typography */
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  --font-display: 'Space Grotesk', 'Plus Jakarta Sans', 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
   --text-xs: 11px;
@@ -297,6 +297,33 @@ img, svg { display: block; }
   50% { transform: translateY(-6px); }
 }
 
+@keyframes orbFloat {
+  0%,  100% { transform: translate(0, 0) scale(1); }
+  33%        { transform: translate(28px, -28px) scale(1.04); }
+  66%        { transform: translate(-18px, 18px) scale(0.97); }
+}
+
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 4px 20px rgba(108,99,255,0.35); }
+  50%       { box-shadow: 0 4px 36px rgba(108,99,255,0.6); }
+}
+
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 .animate-fade-in { animation: fadeIn var(--t-base) ease; }
 .animate-slide-up { animation: slideUp 300ms ease; }
 .animate-spin { animation: spin 800ms linear infinite; }
@@ -455,12 +482,12 @@ img, svg { display: block; }
 
   /* Landing hero padding */
   .landing-hero {
-    padding: 60px 20px 48px !important;
+    padding: 72px 20px 56px !important;
   }
 
   /* Landing features */
   .landing-features {
-    padding: 48px 20px !important;
+    padding: 56px 20px !important;
   }
 
   /* Landing CTA strip */
@@ -468,11 +495,12 @@ img, svg { display: block; }
     flex-direction: column !important;
     align-items: flex-start !important;
     padding: 40px 20px !important;
+    margin: 0 16px 60px !important;
   }
 
   /* Footer padding */
   .landing-footer {
-    padding: 16px 20px !important;
+    padding: 20px 16px !important;
   }
 
   /* Auth header padding */
@@ -503,6 +531,14 @@ img, svg { display: block; }
 @media (max-width: 768px) {
   .hide-on-mobile { display: none !important; }
   .show-on-mobile { display: flex !important; }
+}
+
+/* Landing CTA banner mobile margin */
+@media (max-width: 768px) {
+  .landing-cta-banner {
+    margin: 0 16px 60px !important;
+    padding: 48px 24px !important;
+  }
 }
 
 /* Very small phones */

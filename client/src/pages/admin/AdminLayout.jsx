@@ -1,5 +1,5 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Bell, LogOut, Shield, ChevronRight } from 'lucide-react';
+import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
+import { LayoutDashboard, Users, Bell, LogOut, Shield, ChevronRight, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth.js';
 
 const NAV = [
@@ -27,8 +27,8 @@ export default function AdminLayout() {
         height: '100dvh',
       }}>
         {/* Logo */}
-        <div style={{ padding: '20px 16px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ padding: '16px 12px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
             <div style={{
               width: 30, height: 30, borderRadius: 8,
               background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
@@ -41,6 +41,19 @@ export default function AdminLayout() {
               <div style={{ fontSize: 10, color: '#6366f1', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Admin</div>
             </div>
           </div>
+          <Link to="/dashboard" style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            padding: '6px 10px', borderRadius: 6,
+            fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.45)',
+            textDecoration: 'none', background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            transition: 'color 150ms, background 150ms',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.09)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.45)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
+          >
+            <ArrowLeft size={12} /> Вернуться в приложение
+          </Link>
         </div>
 
         {/* Nav */}
