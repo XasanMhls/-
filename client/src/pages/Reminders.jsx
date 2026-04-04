@@ -99,7 +99,7 @@ export default function Reminders() {
         {/* Count */}
         {pagination && (
           <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 500 }}>
-            {pagination.total} reminder{pagination.total !== 1 ? 's' : ''}
+            {t('reminders.count', { count: pagination.total })}
           </p>
         )}
 

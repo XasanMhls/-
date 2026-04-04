@@ -9,22 +9,26 @@
  *   getVoices(lang?): Voice[]
  *   buildReminderText(reminder, lang): string
  */
+import { elevenLabsProvider } from './elevenLabsProvider.js';
 import { speechSynthesisProvider } from './speechSynthesisProvider.js';
 
-// Future: import { elevenLabsProvider } from './elevenLabsProvider.js';
-// Future: import { openAiTtsProvider } from './openAiTtsProvider.js';
-
-const activeProvider = speechSynthesisProvider;
+// ElevenLabs — основной провайдер (Jarvis-like голос, мультиязычный)
+// Если запрос упадёт — fallback на браузерный TTS
+const activeProvider = elevenLabsProvider;
 
 export const voice = {
   isSupported: () => activeProvider.isSupported(),
 
   async speak(text, lang = 'ru', options = {}) {
-    if (!activeProvider.isSupported()) {
-      console.warn('[VoiceProvider] TTS not supported in this browser');
-      return;
+    try {
+      return await activeProvider.speak(text, lang, options);
+    } catch (err) {
+      // Fallback to browser TTS if ElevenLabs fails
+      console.warn('[VoiceProvider] ElevenLabs failed, falling back to browser TTS:', err?.message);
+      if (speechSynthesisProvider.isSupported()) {
+        return speechSynthesisProvider.speak(text, lang, options);
+      }
     }
-    return activeProvider.speak(text, lang, options);
   },
 
   stop: () => activeProvider.stop?.(),
@@ -35,9 +39,13 @@ export const voice = {
     activeProvider.buildReminderText(reminder, lang),
 
   async speakReminder(reminder) {
-    const lang = reminder.language === 'auto'
-      ? detectLanguage(reminder)
-      : reminder.language;
+    // Priority: reminder explicit lang → app language setting → auto-detect from text
+    let lang;
+    if (reminder.language && reminder.language !== 'auto') {
+      lang = reminder.language;
+    } else {
+      lang = localStorage.getItem('chronos_lang') || detectLanguage(reminder);
+    }
     const text = activeProvider.buildReminderText(reminder, lang);
     return activeProvider.speak(text, lang);
   },

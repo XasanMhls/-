@@ -4,11 +4,12 @@ import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Mail, Lock, Clock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth.js';
+import { setLanguage } from '../i18n/index.js';
 import Input from '../components/ui/Input.jsx';
 import Button from '../components/ui/Button.jsx';
 
 export default function Login() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { login } = useAuth();
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPass, setShowPass] = useState(false);
@@ -72,12 +73,31 @@ export default function Login() {
             Chronos
           </span>
         </Link>
-        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-          <span className="auth-header-hint">{t('auth.noAccount')}</span>
-          <Link to="/register" style={{ color: 'var(--accent)', fontWeight: 500, whiteSpace: 'nowrap' }}>
-            {t('auth.register')}
-          </Link>
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+          {/* Language switcher */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '3px', background: 'var(--bg-surface)', borderRadius: 8, border: '1px solid var(--border)' }}>
+            {[['ru','RU'],['en','EN'],['uz','UZ']].map(([code, label]) => {
+              const active = (i18n.language || '').split('-')[0] === code;
+              return (
+                <button key={code} onClick={() => setLanguage(code)} style={{
+                  padding: '3px 9px', borderRadius: 5, fontSize: 11, fontWeight: 700,
+                  letterSpacing: '0.04em', cursor: 'pointer', border: 'none',
+                  background: active ? 'var(--accent)' : 'transparent',
+                  color: active ? '#fff' : 'var(--text-muted)',
+                  transition: 'all 0.15s',
+                }}>
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+          <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span className="auth-header-hint">{t('auth.noAccount')}</span>
+            <Link to="/register" style={{ color: 'var(--accent)', fontWeight: 500, whiteSpace: 'nowrap' }}>
+              {t('auth.register')}
+            </Link>
+          </p>
+        </div>
       </header>
 
       {/* Form */}
@@ -168,7 +188,7 @@ export default function Login() {
             lineHeight: 1.6,
           }}>
             <strong style={{ color: 'var(--text-secondary)' }}>Demo:</strong>{' '}
-            demo@chronos.app / demo1234
+            muhibullohxasan@gmail.com / Xasan7311
           </div>
         </motion.div>
       </div>

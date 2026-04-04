@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LayoutDashboard, Bell, Calendar, Settings, LogOut, ChevronLeft, Clock, Shield,
+  LayoutDashboard, Bell, Calendar, Settings, LogOut, ChevronLeft, Clock, Shield, Sun, Moon,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth.js';
@@ -17,7 +17,8 @@ const NAV_ITEMS = [
 export default function Sidebar() {
   const { t } = useTranslation();
   const { logout, user } = useAuth();
-  const { sidebarOpen, toggleSidebar, setSidebarOpen } = useUiStore();
+  const { sidebarOpen, toggleSidebar, setSidebarOpen, theme, setTheme } = useUiStore();
+  const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   const location = useLocation();
 
   const W = sidebarOpen ? 236 : (window.innerWidth < 768 ? 0 : 62);
@@ -225,8 +226,48 @@ export default function Sidebar() {
         })()}
       </nav>
 
+      {/* Theme toggle */}
+      <div style={{ padding: '6px 8px 0', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
+        <button
+          onClick={() => setTheme(isDark ? 'light' : 'dark')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 9,
+            padding: sidebarOpen ? '8px 10px' : '8px',
+            justifyContent: sidebarOpen ? 'flex-start' : 'center',
+            width: '100%',
+            borderRadius: 'var(--radius-md)',
+            color: 'var(--text-muted)',
+            fontSize: 'var(--text-sm)',
+            fontWeight: 400,
+            cursor: 'pointer',
+            transition: 'background 150ms ease, color 150ms ease',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-surface-2)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+        >
+          <motion.div
+            key={isDark ? 'sun' : 'moon'}
+            initial={{ rotate: -20, opacity: 0 }}
+            animate={{ rotate: 0, opacity: 1 }}
+            transition={{ duration: 0.2 }}
+            style={{ flexShrink: 0, display: 'flex' }}
+          >
+            {isDark ? <Sun size={16} /> : <Moon size={16} />}
+          </motion.div>
+          <AnimatePresence>
+            {sidebarOpen && (
+              <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.12 }}>
+                {isDark ? 'Light mode' : 'Dark mode'}
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </button>
+      </div>
+
       {/* User + Logout */}
-      <div style={{ padding: '8px 8px 10px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
+      <div style={{ padding: '4px 8px 10px', flexShrink: 0 }}>
         {sidebarOpen && user && (
           <div style={{
             display: 'flex',

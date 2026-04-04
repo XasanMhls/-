@@ -124,6 +124,17 @@ export default {
       weeklyOverview: 'This week',
       priorityBreakdown: 'By priority',
       quickAdd: 'Quick add',
+      viewAll: 'View all →',
+      noActivity: 'No activity yet',
+      completedRecently: 'Recently completed',
+      thisWeek: 'This week',
+      remindersToday: 'Reminders today',
+      tipTitle: 'Tip',
+      tip1: 'Add a voice reminder so you never miss an important event.',
+      tip2: 'Use "Urgent" priority for tasks due today.',
+      tip3: 'Recurring reminders are set once and repeat forever.',
+      allDone: 'All clear!',
+      allDoneHint: 'No overdue reminders. Great job!',
     },
 
     calendar: {
@@ -157,6 +168,13 @@ export default {
       importData: 'Import data',
       dangerZone: 'Danger zone',
       autoLanguage: 'Auto (match reminder)',
+      data: 'Data',
+      dataHint: 'Export and import your reminders as JSON.',
+      passwordHint: 'At least 6 characters',
+      notifGranted: '✓ Granted',
+      notifDenied: '✗ Denied in browser',
+      notifPending: 'Not requested yet',
+      enable: 'Enable',
     },
 
     onboarding: {
@@ -188,6 +206,11 @@ export default {
       search: 'Search',
       loading: 'Loading...',
       retry: 'Try again',
+    },
+
+    reminders: {
+      count_one: '{{count}} reminder',
+      count_other: '{{count}} reminders',
     },
 
     errors: {

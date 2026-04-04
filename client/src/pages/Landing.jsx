@@ -290,7 +290,7 @@ export default function Landing() {
           {/* Language switcher */}
           <div className="landing-lang-switcher" style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: 8, border: '1px solid rgba(255,255,255,0.08)', margin: '0 6px' }}>
             {[['ru','RU'],['en','EN'],['uz','UZ']].map(([code, label]) => {
-              const active = i18n.language === code;
+              const active = (i18n.language || '').split('-')[0] === code;
               return (
                 <button key={code} onClick={() => setLanguage(code)} style={{
                   padding: '4px 10px', borderRadius: 6, fontSize: 12, fontWeight: 700,
@@ -298,10 +298,7 @@ export default function Landing() {
                   background: active ? 'rgba(124,106,245,0.8)' : 'transparent',
                   color: active ? '#fff' : 'rgba(255,255,255,0.4)',
                   transition: 'background 150ms, color 150ms',
-                }}
-                  onMouseEnter={e => { if (!active) { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; } }}
-                  onMouseLeave={e => { if (!active) { e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; e.currentTarget.style.background = 'transparent'; } }}
-                >
+                }}>
                   {label}
                 </button>
               );
@@ -360,7 +357,7 @@ export default function Landing() {
             {/* Language switcher in mobile menu */}
             <div style={{ display: 'flex', gap: 8, marginTop: 8, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
               {[['ru','RU'],['en','EN'],['uz','UZ']].map(([code, label]) => {
-                const active = i18n.language === code;
+                const active = (i18n.language || '').split('-')[0] === code;
                 return (
                   <button key={code} onClick={() => setLanguage(code)} style={{ flex: 1, padding: '10px', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: 'pointer', border: 'none', background: active ? 'rgba(124,106,245,0.8)' : 'rgba(255,255,255,0.06)', color: active ? '#fff' : 'rgba(255,255,255,0.5)' }}>
                     {label}

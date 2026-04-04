@@ -124,6 +124,17 @@ export default {
       weeklyOverview: 'На этой неделе',
       priorityBreakdown: 'По приоритету',
       quickAdd: 'Добавить',
+      viewAll: 'Все напоминания →',
+      noActivity: 'Активности пока нет',
+      completedRecently: 'Недавно выполненные',
+      thisWeek: 'Эта неделя',
+      remindersToday: 'Сегодня напоминаний',
+      tipTitle: 'Совет дня',
+      tip1: 'Добавьте голосовое напоминание, чтобы не пропустить важное событие.',
+      tip2: 'Используйте приоритет «Срочно» для задач на сегодня.',
+      tip3: 'Повторяющиеся напоминания настраиваются один раз и работают вечно.',
+      allDone: 'Все сделано!',
+      allDoneHint: 'Нет просроченных напоминаний. Отличная работа!',
     },
 
     calendar: {
@@ -157,6 +168,13 @@ export default {
       importData: 'Импорт данных',
       dangerZone: 'Опасная зона',
       autoLanguage: 'Авто (по напоминанию)',
+      data: 'Данные',
+      dataHint: 'Экспорт и импорт напоминаний в формате JSON.',
+      passwordHint: 'Минимум 6 символов',
+      notifGranted: '✓ Разрешено',
+      notifDenied: '✗ Запрещено в браузере',
+      notifPending: 'Ещё не запрошено',
+      enable: 'Включить',
     },
 
     onboarding: {
@@ -188,6 +206,12 @@ export default {
       search: 'Поиск',
       loading: 'Загрузка...',
       retry: 'Попробовать снова',
+    },
+
+    reminders: {
+      count_one: '{{count}} напоминание',
+      count_few: '{{count}} напоминания',
+      count_many: '{{count}} напоминаний',
     },
 
     errors: {

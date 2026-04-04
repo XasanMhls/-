@@ -12,13 +12,53 @@
 const LANG_CODES = {
   ru: ['ru-RU', 'ru'],
   en: ['en-US', 'en-GB', 'en-AU', 'en'],
-  uz: ['uz-UZ', 'uz', 'ru-RU'],
+  // Узбекского голоса в браузерах нет — используем русский neural
+  uz: ['ru-RU', 'ru', 'uz-UZ', 'uz'],
 };
 
+// Приоритет: мужские Neural голоса звучат чётко и профессионально (как Jarvis)
 const TOP_VOICE_NAMES = {
-  ru: ['irina online (natural)', 'irina online', 'irina', 'dmitri online (natural)', 'dmitri online', 'dmitri', 'svetlana'],
-  en: ['aria online (natural)', 'aria online', 'aria', 'guy online (natural)', 'jenny online (natural)', 'jenny', 'samantha'],
-  uz: ['irina', 'dmitri'],
+  ru: [
+    'microsoft dmitri online (natural)',  // лучший — чёткий мужской
+    'microsoft dmitri online',
+    'dmitri online (natural)',
+    'dmitri online',
+    'dmitri',
+    'microsoft irina online (natural)',
+    'microsoft irina online',
+    'irina online (natural)',
+    'irina online',
+    'irina',
+    'google русский',
+  ],
+  en: [
+    'microsoft guy online (natural)',     // лучший — профессиональный мужской
+    'microsoft guy online',
+    'guy online (natural)',
+    'guy online',
+    'microsoft ryan online (natural)',
+    'microsoft ryan online',
+    'ryan online',
+    'microsoft aria online (natural)',
+    'microsoft aria online',
+    'aria online (natural)',
+    'aria online',
+    'aria',
+    'google us english',
+    'daniel',
+    'alex',
+  ],
+  // Для узбекского — лучший доступный мужской русский голос
+  uz: [
+    'microsoft dmitri online (natural)',
+    'microsoft dmitri online',
+    'dmitri online (natural)',
+    'dmitri online',
+    'dmitri',
+    'microsoft irina online (natural)',
+    'irina online',
+    'irina',
+  ],
 };
 
 const QUALITY_KEYWORDS = ['natural', 'neural', 'online', 'enhanced', 'premium', 'wavenet', 'studio'];
@@ -146,13 +186,12 @@ export const speechSynthesisProvider = {
     utterance.lang = LANG_CODES[lang]?.[0] || 'en-US';
 
     const base = {
-      rate: options.rate ?? 0.90,
-      pitch: options.pitch ?? 1.0,
+      rate: options.rate ?? 1.05,   // Чуть быстрее — звучит чётче и увереннее
+      pitch: options.pitch ?? 0.9,  // Чуть ниже тон — как у Jarvis/профессиональный AI
       volume: options.volume ?? 1.0,
     };
-    const { rate, pitch } = humanizeProsody(base);
-    utterance.rate = rate;
-    utterance.pitch = pitch;
+    utterance.rate = base.rate;
+    utterance.pitch = base.pitch;
     utterance.volume = base.volume;
 
     return new Promise(resolve => {

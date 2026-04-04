@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Bell, Clock, CheckCircle2, AlertTriangle, TrendingUp, Calendar, Plus } from 'lucide-react';
+import { Bell, Clock, CheckCircle2, AlertTriangle, TrendingUp, Calendar, Plus, Lightbulb, Zap } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth.js';
 import { useReminders } from '../hooks/useReminders.js';
 import Header from '../components/layout/Header.jsx';
@@ -76,6 +76,7 @@ export default function Dashboard() {
   const { create, toggleComplete, togglePin, snooze, remove } = useReminders();
   const [stats, setStats] = useState(null);
   const [upcoming, setUpcoming] = useState([]);
+  const [completed, setCompleted] = useState([]);
   const [loadingUpcoming, setLoadingUpcoming] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -88,6 +89,10 @@ export default function Dashboard() {
       .then((d) => setUpcoming(d.reminders || []))
       .catch(() => {})
       .finally(() => setLoadingUpcoming(false));
+    reminderService
+      .getReminders({ filter: 'completed', sort: '-updatedAt', limit: 3 })
+      .then((d) => setCompleted(d.reminders || []))
+      .catch(() => {});
   }, []);
 
   const handleCreate = async (data) => {
@@ -179,7 +184,7 @@ export default function Dashboard() {
               {t('dashboard.upcomingReminders')}
             </h3>
             <Link to="/reminders" style={{ fontSize: 'var(--text-sm)', color: 'var(--accent)', fontWeight: 500 }}>
-              {t('actions.back') === 'Назад' ? 'Все напоминания →' : 'View all →'}
+              {t('dashboard.viewAll')}
             </Link>
           </div>
 
@@ -229,6 +234,143 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+
+        {/* All done banner */}
+        {stats && stats.overdue === 0 && stats.total > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            style={{
+              marginTop: 28,
+              padding: '18px 24px',
+              background: 'linear-gradient(135deg, rgba(52,211,153,0.08), rgba(52,211,153,0.03))',
+              border: '1px solid rgba(52,211,153,0.25)',
+              borderRadius: 'var(--radius-lg)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 14,
+            }}
+          >
+            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(52,211,153,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <CheckCircle2 size={20} color="var(--success)" />
+            </div>
+            <div>
+              <p style={{ fontWeight: 700, fontSize: 'var(--text-base)', color: 'var(--success)' }}>{t('dashboard.allDone')}</p>
+              <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', marginTop: 2 }}>{t('dashboard.allDoneHint')}</p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* This week overview */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          style={{ marginTop: 32 }}
+        >
+          <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, letterSpacing: '-0.01em', marginBottom: 16 }}>
+            {t('dashboard.thisWeek')}
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8 }}>
+            {Array.from({ length: 7 }).map((_, i) => {
+              const d = new Date();
+              d.setDate(d.getDate() - d.getDay() + 1 + i); // Mon–Sun
+              const isToday = d.toDateString() === new Date().toDateString();
+              const dayReminders = upcoming.filter(r => {
+                const rd = new Date(r.remindAt);
+                return rd.toDateString() === d.toDateString();
+              });
+              const dayNames = {
+                ru: ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],
+                en: ['Mo','Tu','We','Th','Fr','Sa','Su'],
+                uz: ['Du','Se','Ch','Pa','Ju','Sh','Ya'],
+              };
+              const names = dayNames[i18n.language] || dayNames.en;
+              return (
+                <div key={i} style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                  padding: '10px 4px',
+                  borderRadius: 'var(--radius-md)',
+                  background: isToday ? 'var(--accent-subtle)' : 'var(--bg-surface)',
+                  border: `1px solid ${isToday ? 'var(--border-focus)' : 'var(--border)'}`,
+                }}>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: isToday ? 'var(--accent)' : 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    {names[i]}
+                  </span>
+                  <span style={{ fontSize: 'var(--text-base)', fontWeight: 700, color: isToday ? 'var(--accent)' : 'var(--text-primary)' }}>
+                    {d.getDate()}
+                  </span>
+                  {dayReminders.length > 0 && (
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: isToday ? 'var(--accent)' : 'var(--text-muted)' }} />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+
+        {/* Recently completed */}
+        {completed.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            style={{ marginTop: 32 }}
+          >
+            <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, letterSpacing: '-0.01em', marginBottom: 16 }}>
+              {t('dashboard.completedRecently')}
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {completed.map((reminder) => (
+                <ReminderCard
+                  key={reminder._id}
+                  reminder={reminder}
+                  viewMode="list"
+                  onComplete={(r) => toggleComplete(r).then(() => {})}
+                  onPin={(r) => togglePin(r).then(() => {})}
+                  onDelete={remove}
+                  onSnooze={snooze}
+                />
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Tips */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          style={{ marginTop: 32, marginBottom: 8 }}
+        >
+          <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, letterSpacing: '-0.01em', marginBottom: 16 }}>
+            {t('dashboard.tipTitle')}
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
+            {[
+              { key: 'tip1', icon: Bell, color: '#7c6af5' },
+              { key: 'tip2', icon: Zap, color: '#f59e0b' },
+              { key: 'tip3', icon: TrendingUp, color: '#34d399' },
+            ].map(({ key, icon: Icon, color }) => (
+              <div key={key} style={{
+                display: 'flex', gap: 12, alignItems: 'flex-start',
+                padding: '16px',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-lg)',
+              }}>
+                <div style={{ width: 34, height: 34, borderRadius: 'var(--radius-md)', background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Icon size={16} color={color} />
+                </div>
+                <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                  {t(`dashboard.${key}`)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
       </div>
 
       {/* Create modal */}

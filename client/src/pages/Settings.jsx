@@ -176,12 +176,12 @@ export default function Settings() {
                 {t('settings.notificationsEnabled')}
               </p>
               <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: 2 }}>
-                {permission === 'granted' ? '✓ Granted' : permission === 'denied' ? '✗ Denied in browser' : 'Not requested yet'}
+                {permission === 'granted' ? t('settings.notifGranted') : permission === 'denied' ? t('settings.notifDenied') : t('settings.notifPending')}
               </p>
             </div>
             {permission !== 'granted' && (
               <Button size="sm" onClick={requestNotifications}>
-                Enable
+                {t('settings.enable')}
               </Button>
             )}
           </div>
@@ -212,8 +212,23 @@ export default function Settings() {
             />
           </div>
           <div>
+            <Button
+              variant="secondary"
+              icon={<Volume2 size={15} />}
+              onClick={() => {
+                const lang = localStorage.getItem('chronos_lang') || i18n.language || 'ru';
+                const testTexts = {
+                  ru: 'Голосовое напоминание активировано. Chronos готов.',
+                  en: 'Voice reminder activated. Chronos is ready.',
+                  uz: 'Ovozli eslatma faollashtirildi. Chronos tayyor.',
+                };
+                voice.speak(testTexts[lang] || testTexts.en, lang);
+              }}
+            >
+              {t('reminder.testVoice')}
+            </Button>
             {!voice.isSupported() && (
-              <p style={{ fontSize: 'var(--text-sm)', color: 'var(--warning)', padding: '10px 14px', background: 'var(--warning-subtle)', borderRadius: 'var(--radius-md)' }}>
+              <p style={{ fontSize: 'var(--text-sm)', color: 'var(--warning)', padding: '10px 14px', background: 'var(--warning-subtle)', borderRadius: 'var(--radius-md)', marginTop: 10 }}>
                 {t('voice.notSupported')}
               </p>
             )}
@@ -238,7 +253,7 @@ export default function Settings() {
               type="password"
               value={pwForm.newPassword}
               onChange={(e) => setPwForm((f) => ({ ...f, newPassword: e.target.value }))}
-              hint="At least 6 characters"
+              hint={t('settings.passwordHint')}
               required
             />
             <Button type="submit" loading={savingPw} style={{ alignSelf: 'flex-start' }}>
@@ -248,7 +263,7 @@ export default function Settings() {
         </Section>
 
         {/* Export / Import */}
-        <Section title="Data" icon={Download}>
+        <Section title={t('settings.data')} icon={Download}>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <Button variant="secondary" icon={<Download size={15} />} onClick={handleExport} loading={exporting}>
               {t('settings.exportData')}
@@ -261,7 +276,7 @@ export default function Settings() {
             </label>
           </div>
           <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
-            Export your reminders as JSON. Import supports Chronos-format JSON files.
+            {t('settings.dataHint')}
           </p>
         </Section>
       </div>

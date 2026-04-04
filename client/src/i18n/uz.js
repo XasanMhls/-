@@ -124,6 +124,17 @@ export default {
       weeklyOverview: 'Bu hafta',
       priorityBreakdown: 'Ustuvorlik bo\'yicha',
       quickAdd: 'Qo\'shish',
+      viewAll: 'Barchasi →',
+      noActivity: 'Hozircha faollik yo\'q',
+      completedRecently: 'Yaqinda bajarilgan',
+      thisWeek: 'Bu hafta',
+      remindersToday: 'Bugungi eslatmalar',
+      tipTitle: 'Maslahat',
+      tip1: 'Muhim hodisani o\'tkazib yubormaslik uchun ovozli eslatma qo\'shing.',
+      tip2: 'Bugungi vazifalar uchun "Shoshilinch" ustuvorligidan foydalaning.',
+      tip3: 'Takrorlanuvchi eslatmalar bir marta o\'rnatiladi va abadiy ishlaydi.',
+      allDone: 'Hammasi tayyor!',
+      allDoneHint: 'Muddati o\'tgan eslatmalar yo\'q. Ajoyib!',
     },
 
     calendar: {
@@ -157,6 +168,13 @@ export default {
       importData: 'Ma\'lumotlarni import qilish',
       dangerZone: 'Xavfli zona',
       autoLanguage: 'Avto (eslatma tilida)',
+      data: 'Ma\'lumotlar',
+      dataHint: 'Eslatmalarni JSON formatida eksport va import qiling.',
+      passwordHint: 'Kamida 6 ta belgi',
+      notifGranted: '✓ Ruxsat berilgan',
+      notifDenied: '✗ Brauzerda rad etilgan',
+      notifPending: 'Hali so\'ralmagan',
+      enable: 'Yoqish',
     },
 
     onboarding: {
@@ -188,6 +206,10 @@ export default {
       search: 'Qidirish',
       loading: 'Yuklanmoqda...',
       retry: 'Qayta urinib ko\'ring',
+    },
+
+    reminders: {
+      count_other: '{{count}} ta eslatma',
     },
 
     errors: {
