@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { setLanguage } from '../i18n/index.js';
 import {
   Volume2, Globe, Repeat, Bell, Clock, ArrowRight, CheckCircle,
   Zap, Shield, Calendar, BarChart2, Layers, Mic,
@@ -209,7 +210,7 @@ function FaqItem({ q, a }) {
 
 /* ─── main component ─────────────────────────────────────── */
 export default function Landing() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // Mouse-following cursor glow
   const cursorGlowRef = useRef(null);
@@ -282,6 +283,27 @@ export default function Landing() {
               onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; e.currentTarget.style.background = 'transparent'; }}
             >{label}</a>
           ))}
+
+          {/* Language switcher */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: 8, border: '1px solid rgba(255,255,255,0.08)', margin: '0 6px' }}>
+            {[['ru','RU'],['en','EN'],['uz','UZ']].map(([code, label]) => {
+              const active = i18n.language === code;
+              return (
+                <button key={code} onClick={() => setLanguage(code)} style={{
+                  padding: '4px 10px', borderRadius: 6, fontSize: 12, fontWeight: 700,
+                  letterSpacing: '0.04em', cursor: 'pointer', border: 'none',
+                  background: active ? 'rgba(124,106,245,0.8)' : 'transparent',
+                  color: active ? '#fff' : 'rgba(255,255,255,0.4)',
+                  transition: 'background 150ms, color 150ms',
+                }}
+                  onMouseEnter={e => { if (!active) { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; } }}
+                  onMouseLeave={e => { if (!active) { e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; e.currentTarget.style.background = 'transparent'; } }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
           <Link to="/login" style={{ padding: '8px 18px', fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.55)', borderRadius: 8, textDecoration: 'none', transition: 'color 150ms, background 150ms' }}
             onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; }}
             onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; e.currentTarget.style.background = 'transparent'; }}
