@@ -5,30 +5,26 @@ import { useTranslation } from 'react-i18next';
 import useAuthStore from '../store/authStore.js';
 import { authService } from '../services/authService.js';
 import { setLanguage } from '../i18n/index.js';
+import { voice } from '../voice/VoiceProvider.js';
 
 export function useAuth() {
   const { user, token, isAuthenticated, setAuth, clearAuth, updateUser } = useAuthStore();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const greet = useCallback((userName, lang = 'ru') => {
-    return new Promise((resolve) => {
-      if (!window.speechSynthesis) { resolve(); return; }
-      const firstName = userName?.split(' ')[0] || '';
-      const messages = {
-        ru: `Добро пожаловать, ${firstName}!`,
-        en: `Welcome, ${firstName}!`,
-        uz: `Xush kelibsiz, ${firstName}!`,
-      };
-      const msg = new SpeechSynthesisUtterance(messages[lang] || messages.ru);
-      msg.lang = lang === 'uz' ? 'uz-UZ' : lang === 'en' ? 'en-US' : 'ru-RU';
-      msg.volume = 1;
-      msg.rate = 0.95;
-      msg.onend = resolve;
-      msg.onerror = resolve;
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(msg);
-    });
+  const greet = useCallback(async (userName, lang = 'ru') => {
+    const firstName = userName?.split(' ')[0] || '';
+    const messages = {
+      ru: `Добро пожаловать, ${firstName}. Рад вас видеть!`,
+      en: `Welcome back, ${firstName}. Good to see you!`,
+      uz: `Xush kelibsiz, ${firstName}. Sizi ko'rganimdan xursandman!`,
+    };
+    const text = messages[lang] || messages.ru;
+    try {
+      await voice.speak(text, lang, { rate: 0.88, pitch: 1.05 });
+    } catch {
+      // silently ignore if TTS fails
+    }
   }, []);
 
   const login = useCallback(async (credentials) => {

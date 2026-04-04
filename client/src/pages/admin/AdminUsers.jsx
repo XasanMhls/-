@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Plus, Trash2, Shield, ShieldOff, Search, X, Eye, EyeOff } from 'lucide-react';
+import { Plus, Trash2, Shield, ShieldOff, Search, X, Eye, EyeOff, Mail, Clock, LogIn } from 'lucide-react';
 import { adminService } from '../../services/adminService.js';
 import { useAuth } from '../../hooks/useAuth.js';
 
@@ -16,6 +16,19 @@ const BTN = (extra = {}) => ({
   cursor: 'pointer', border: 'none', transition: 'opacity 150ms ease',
   ...extra,
 });
+
+function timeAgo(dateStr) {
+  if (!dateStr) return '—';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 30) return `${days}d ago`;
+  return new Date(dateStr).toLocaleDateString();
+}
 
 function Modal({ open, onClose, title, children }) {
   if (!open) return null;
@@ -41,6 +54,7 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
   const [editUser, setEditUser] = useState(null);
+  const [detailUser, setDetailUser] = useState(null);
   const [form, setForm] = useState({ name: '', email: '', password: '', isAdmin: false });
   const [showPass, setShowPass] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -156,7 +170,7 @@ export default function AdminUsers() {
       {/* Search */}
       <div style={{ position: 'relative', maxWidth: 320, marginBottom: 18 }}>
         <Search size={14} style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: '#475569' }} />
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search users…"
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name or email…"
           style={{ ...INPUT_STYLE, paddingLeft: 34 }} />
       </div>
 
@@ -165,39 +179,66 @@ export default function AdminUsers() {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-              {['Name', 'Email', 'Role', 'Joined', 'Actions'].map(h => (
+              {['User', 'Email', 'Role', 'Registered', 'Last Login', 'Actions'].map(h => (
                 <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={5} style={{ padding: 40, textAlign: 'center', color: '#475569', fontSize: 13 }}>Loading…</td></tr>
+              <tr><td colSpan={6} style={{ padding: 40, textAlign: 'center', color: '#475569', fontSize: 13 }}>Loading…</td></tr>
             ) : data.users.length === 0 ? (
-              <tr><td colSpan={5} style={{ padding: 40, textAlign: 'center', color: '#475569', fontSize: 13 }}>No users found</td></tr>
+              <tr><td colSpan={6} style={{ padding: 40, textAlign: 'center', color: '#475569', fontSize: 13 }}>No users found</td></tr>
             ) : data.users.map(u => (
-              <tr key={u._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+              <tr key={u._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', cursor: 'pointer' }}
                 onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                <td style={{ padding: '12px 16px' }}>
+
+                {/* Name */}
+                <td style={{ padding: '12px 16px' }} onClick={() => setDetailUser(u)}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: 'white', flexShrink: 0 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: 'white', flexShrink: 0 }}>
                       {u.name?.[0]?.toUpperCase()}
                     </div>
-                    <span style={{ fontSize: 13, fontWeight: 500, color: '#e2e8f0' }}>{u.name}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0' }}>{u.name}</span>
                   </div>
                 </td>
-                <td style={{ padding: '12px 16px', fontSize: 13, color: '#94a3b8' }}>{u.email}</td>
+
+                {/* Email */}
+                <td style={{ padding: '12px 16px' }} onClick={() => setDetailUser(u)}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <Mail size={11} color="#475569" />
+                    <span style={{ fontSize: 12, color: '#94a3b8', letterSpacing: '0.01em' }}>{u.email}</span>
+                  </div>
+                </td>
+
+                {/* Role */}
                 <td style={{ padding: '12px 16px' }}>
                   <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 20,
                     background: u.isAdmin ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.05)',
                     color: u.isAdmin ? '#818cf8' : '#64748b' }}>
-                    {u.isAdmin ? 'Admin' : 'User'}
+                    {u.isAdmin ? '⚡ Admin' : 'User'}
                   </span>
                 </td>
-                <td style={{ padding: '12px 16px', fontSize: 12, color: '#475569' }}>
-                  {new Date(u.createdAt).toLocaleDateString()}
+
+                {/* Registered */}
+                <td style={{ padding: '12px 16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#475569' }}>
+                    <Clock size={11} />
+                    {new Date(u.createdAt).toLocaleDateString()}
+                  </div>
                 </td>
+
+                {/* Last Login */}
+                <td style={{ padding: '12px 16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12,
+                    color: u.lastLoginAt ? '#4ade80' : '#475569' }}>
+                    <LogIn size={11} />
+                    {timeAgo(u.lastLoginAt)}
+                  </div>
+                </td>
+
+                {/* Actions */}
                 <td style={{ padding: '12px 16px' }}>
                   <div style={{ display: 'flex', gap: 4 }}>
                     <button onClick={() => openEdit(u)} style={{ padding: '5px 10px', borderRadius: 6, background: 'rgba(255,255,255,0.05)', color: '#94a3b8', fontSize: 12, cursor: 'pointer', border: 'none', fontFamily: 'inherit' }}>Edit</button>
@@ -218,6 +259,54 @@ export default function AdminUsers() {
           </tbody>
         </table>
       </div>
+
+      {/* Detail Modal */}
+      <Modal open={!!detailUser} onClose={() => setDetailUser(null)} title="User Details">
+        {detailUser && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 700, color: 'white', flexShrink: 0 }}>
+                {detailUser.name?.[0]?.toUpperCase()}
+              </div>
+              <div>
+                <div style={{ fontSize: 17, fontWeight: 700, color: '#e2e8f0' }}>{detailUser.name}</div>
+                <div style={{ fontSize: 12, color: detailUser.isAdmin ? '#818cf8' : '#64748b', fontWeight: 600, marginTop: 2 }}>
+                  {detailUser.isAdmin ? '⚡ Admin' : 'Regular User'}
+                </div>
+              </div>
+            </div>
+
+            {[
+              { label: 'Email (login)', value: detailUser.email, icon: Mail },
+              { label: 'Registered', value: new Date(detailUser.createdAt).toLocaleString(), icon: Clock },
+              { label: 'Last Login', value: detailUser.lastLoginAt ? new Date(detailUser.lastLoginAt).toLocaleString() : 'Never', icon: LogIn },
+              { label: 'Language', value: detailUser.preferences?.language?.toUpperCase() || '—', icon: null },
+              { label: 'Theme', value: detailUser.preferences?.theme || '—', icon: null },
+            ].map(({ label, value, icon: Icon }) => (
+              <div key={label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: '#64748b', fontWeight: 500 }}>
+                  {Icon && <Icon size={12} />}
+                  {label}
+                </div>
+                <span style={{ fontSize: 13, color: '#cbd5e1', fontWeight: 600 }}>{value}</span>
+              </div>
+            ))}
+
+            <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+              <button onClick={() => { setDetailUser(null); openEdit(detailUser); }}
+                style={BTN({ background: '#6366f1', color: 'white', flex: 1, justifyContent: 'center' })}>
+                Edit User
+              </button>
+              {detailUser._id !== me?._id && (
+                <button onClick={() => { setDetailUser(null); handleDelete(detailUser._id); }}
+                  style={BTN({ background: 'rgba(239,68,68,0.12)', color: '#ef4444', flex: 1, justifyContent: 'center' })}>
+                  Delete
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </Modal>
 
       {/* Create Modal */}
       <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Add New User">

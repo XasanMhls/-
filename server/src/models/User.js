@@ -62,6 +62,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    lastLoginAt: {
+      type: Date,
+      default: null,
+    },
     onboardingCompleted: {
       type: Boolean,
       default: false,

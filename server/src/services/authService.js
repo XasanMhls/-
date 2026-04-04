@@ -32,7 +32,10 @@ export async function loginUser({ email, password }) {
 
   const token = signToken({ id: user._id });
 
-  // Remove password from response
+  // Track last login time
+  user.lastLoginAt = new Date();
+  await user.save({ validateBeforeSave: false });
+
   user.password = undefined;
   return { user, token };
 }

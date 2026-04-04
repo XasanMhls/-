@@ -4,12 +4,17 @@ import bcrypt from 'bcryptjs';
 
 export async function getStats(req, res, next) {
   try {
-    const [totalUsers, totalReminders, admins] = await Promise.all([
+    const now = new Date();
+    const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const [totalUsers, totalReminders, admins, activeToday, overdueCount, newUsersToday] = await Promise.all([
       User.countDocuments(),
       Reminder.countDocuments(),
       User.countDocuments({ isAdmin: true }),
+      User.countDocuments({ lastLoginAt: { $gte: last24h } }),
+      Reminder.countDocuments({ isCompleted: false, remindAt: { $lt: now } }),
+      User.countDocuments({ createdAt: { $gte: last24h } }),
     ]);
-    res.json({ totalUsers, totalReminders, admins });
+    res.json({ totalUsers, totalReminders, admins, activeToday, overdueCount, newUsersToday });
   } catch (err) { next(err); }
 }
 
