@@ -659,7 +659,7 @@ export default function Landing() {
                   ))}
                 </div>
                 <a
-                  href="/downloads/chronos-windows.zip"
+                  href="https://github.com/XasanMhls/-/releases/download/v1.0.0/chronos-windows.zip"
                   download
                   style={{
                     display: 'inline-flex', alignItems: 'center', gap: 8,

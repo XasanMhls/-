@@ -4,3 +4,7 @@ server/node_modules/
 client/dist/
 .env
 server/.env
+client/public/downloads/chronos-windows.zip
+client/public/downloads/*.exe
+client/public/downloads/*.apk
+dist-electron/
