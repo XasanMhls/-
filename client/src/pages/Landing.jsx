@@ -617,22 +617,15 @@ export default function Landing() {
                     </div>
                   ))}
                 </div>
-                <a
-                  href="/downloads/chronos.apk"
-                  download
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 8,
-                    padding: '13px 26px', fontSize: 14, fontWeight: 700,
-                    color: '#0a0c14', background: '#34d399',
-                    borderRadius: 12, textDecoration: 'none',
-                    boxShadow: '0 8px 32px rgba(52,211,153,0.4)',
-                    transition: 'transform 200ms, box-shadow 200ms',
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 44px rgba(52,211,153,0.6)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(52,211,153,0.4)'; }}
-                >
-                  <Download size={15} strokeWidth={2.5} /> Скачать APK
-                </a>
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  padding: '13px 26px', fontSize: 14, fontWeight: 700,
+                  color: 'rgba(52,211,153,0.5)', background: 'rgba(52,211,153,0.08)',
+                  borderRadius: 12, border: '1px solid rgba(52,211,153,0.2)',
+                  cursor: 'not-allowed',
+                }}>
+                  <Download size={15} strokeWidth={2.5} /> Скоро
+                </div>
               </motion.div>
 
               {/* Windows */}
