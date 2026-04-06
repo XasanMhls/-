@@ -3,14 +3,10 @@
   "appName": "Chronos",
   "webDir": "dist",
   "server": {
-    "androidScheme": "https"
+    "url": "https://chronos-hasans-projects-48208976.vercel.app",
+    "cleartext": false
   },
   "plugins": {
-    "LocalNotifications": {
-      "smallIcon": "ic_stat_icon_config_sample",
-      "iconColor": "#7c6af5",
-      "sound": "beep.wav"
-    },
     "SplashScreen": {
       "launchShowDuration": 1500,
       "backgroundColor": "#08090f",

@@ -22,24 +22,11 @@ export default function Layout() {
   }, [theme]);
 
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 768) setSidebarOpen(false);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    setSidebarOpen(true);
   }, [setSidebarOpen]);
 
   return (
     <div style={{ display: 'flex', minHeight: '100dvh', background: 'var(--bg-canvas)', position: 'relative' }}>
-      {/* Mobile backdrop */}
-      {sidebarOpen && (
-        <div
-          onClick={() => setSidebarOpen(false)}
-          className="mobile-backdrop"
-        />
-      )}
-
       <Sidebar />
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>

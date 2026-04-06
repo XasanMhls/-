@@ -21,7 +21,7 @@ export default function Sidebar() {
   const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   const location = useLocation();
 
-  const W = sidebarOpen ? 236 : (window.innerWidth < 768 ? 0 : 62);
+  const W = sidebarOpen ? 236 : 62;
 
   return (
     <motion.aside
@@ -116,7 +116,7 @@ export default function Sidebar() {
             <NavLink
               key={to}
               to={to}
-              onClick={() => { if (window.innerWidth < 768) setSidebarOpen(false); }}
+              onClick={() => {}}
               style={{
                 position: 'relative',
                 display: 'flex',
@@ -183,7 +183,7 @@ export default function Sidebar() {
           return (
             <NavLink
               to="/admin"
-              onClick={() => { if (window.innerWidth < 768) setSidebarOpen(false); }}
+              onClick={() => {}}
               style={{
                 position: 'relative',
                 display: 'flex',
