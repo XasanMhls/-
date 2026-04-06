@@ -7,6 +7,7 @@ import {
   Volume2, Globe, Repeat, Bell, Clock, ArrowRight, CheckCircle,
   Zap, Shield, Calendar, BarChart2, Layers, Mic,
   ChevronDown, Star, Play, Sparkles, Menu, X,
+  Smartphone, Monitor, Download,
 } from 'lucide-react';
 
 /* ─── data ──────────────────────────────────────────────── */
@@ -575,6 +576,110 @@ export default function Landing() {
                 </Link>
               </div>
             </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ══ DOWNLOAD ══ */}
+      <section id="download" style={{ position: 'relative', zIndex: 1, padding: '100px 40px', borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.012)' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
+          <motion.div {...vu()}>
+            <SectionBadge color="#38bdf8" bg="rgba(56,189,248,0.1)" border="rgba(56,189,248,0.2)">
+              <Download size={11} /> Скачать приложение
+            </SectionBadge>
+            <SectionH2 style={{ marginBottom: 16 }}>Chronos у тебя в кармане</SectionH2>
+            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 16, color: 'rgba(255,255,255,0.4)', lineHeight: 1.65, maxWidth: 480, margin: '0 auto 56px' }}>
+              Установи приложение на Android или Windows — работает без браузера, с голосом и уведомлениями.
+            </p>
+
+            {/* Download cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
+              {/* Android */}
+              <motion.div {...vu(0.08)} style={{
+                padding: '36px 32px', borderRadius: 20,
+                background: 'rgba(52,211,153,0.06)',
+                border: '1px solid rgba(52,211,153,0.22)',
+                textAlign: 'left', position: 'relative', overflow: 'hidden',
+              }}>
+                <div aria-hidden style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: 'radial-gradient(circle, rgba(52,211,153,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
+                <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+                  <Smartphone size={24} color="#34d399" strokeWidth={2} />
+                </div>
+                <div style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 8 }}>Android</div>
+                <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13.5, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, marginBottom: 28 }}>
+                  Скачай APK — устанавливается напрямую без Play Store. Требует Android 7.0+
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28 }}>
+                  {['Голосовые уведомления', 'Работает фоном', 'RU / EN / UZ'].map(f => (
+                    <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <CheckCircle size={14} color="#34d399" strokeWidth={2.5} />
+                      <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>{f}</span>
+                    </div>
+                  ))}
+                </div>
+                <a
+                  href="/downloads/chronos.apk"
+                  download
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                    padding: '13px 26px', fontSize: 14, fontWeight: 700,
+                    color: '#0a0c14', background: '#34d399',
+                    borderRadius: 12, textDecoration: 'none',
+                    boxShadow: '0 8px 32px rgba(52,211,153,0.4)',
+                    transition: 'transform 200ms, box-shadow 200ms',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 44px rgba(52,211,153,0.6)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(52,211,153,0.4)'; }}
+                >
+                  <Download size={15} strokeWidth={2.5} /> Скачать APK
+                </a>
+              </motion.div>
+
+              {/* Windows */}
+              <motion.div {...vu(0.15)} style={{
+                padding: '36px 32px', borderRadius: 20,
+                background: 'rgba(56,189,248,0.06)',
+                border: '1px solid rgba(56,189,248,0.22)',
+                textAlign: 'left', position: 'relative', overflow: 'hidden',
+              }}>
+                <div aria-hidden style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: 'radial-gradient(circle, rgba(56,189,248,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
+                <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(56,189,248,0.12)', border: '1px solid rgba(56,189,248,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+                  <Monitor size={24} color="#38bdf8" strokeWidth={2} />
+                </div>
+                <div style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 8 }}>Windows</div>
+                <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13.5, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, marginBottom: 28 }}>
+                  Портативная версия — распакуй ZIP и запусти Chronos.exe. Windows 10/11, 64-bit.
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28 }}>
+                  {['Живёт в системном трее', 'Нативные уведомления', 'Автозапуск при входе'].map(f => (
+                    <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <CheckCircle size={14} color="#38bdf8" strokeWidth={2.5} />
+                      <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>{f}</span>
+                    </div>
+                  ))}
+                </div>
+                <a
+                  href="/downloads/chronos-windows.zip"
+                  download
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                    padding: '13px 26px', fontSize: 14, fontWeight: 700,
+                    color: '#0a0c14', background: '#38bdf8',
+                    borderRadius: 12, textDecoration: 'none',
+                    boxShadow: '0 8px 32px rgba(56,189,248,0.4)',
+                    transition: 'transform 200ms, box-shadow 200ms',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 44px rgba(56,189,248,0.6)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(56,189,248,0.4)'; }}
+                >
+                  <Download size={15} strokeWidth={2.5} /> Скачать ZIP
+                </a>
+              </motion.div>
+            </div>
+
+            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 12.5, color: 'rgba(255,255,255,0.2)', marginTop: 28 }}>
+              Данные хранятся в облаке — доступны на всех устройствах одновременно.
+            </p>
           </motion.div>
         </div>
       </section>

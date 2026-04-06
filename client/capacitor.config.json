@@ -1,0 +1,26 @@
+{
+  "appId": "com.chronos.reminder",
+  "appName": "Chronos",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon_config_sample",
+      "iconColor": "#7c6af5",
+      "sound": "beep.wav"
+    },
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "backgroundColor": "#08090f",
+      "showSpinner": false
+    }
+  },
+  "android": {
+    "backgroundColor": "#08090f",
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  }
+}

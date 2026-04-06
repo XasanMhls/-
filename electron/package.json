@@ -1,0 +1,49 @@
+{
+  "name": "chronos",
+  "version": "1.0.0",
+  "description": "Chronos — Умные напоминания с голосом",
+  "main": "main.js",
+  "author": "Chronos Team",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win --x64",
+    "build:win32": "electron-builder --win --ia32"
+  },
+  "build": {
+    "appId": "com.chronos.reminder",
+    "productName": "Chronos",
+    "copyright": "© 2025 Chronos",
+    "directories": {
+      "output": "../dist-electron",
+      "buildResources": "."
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "icon.png",
+      "../client/dist/**/*"
+    ],
+    "extraResources": [],
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] }
+      ],
+      "icon": "icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Chronos",
+      "installerHeaderIcon": "icon.png"
+    }
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
+  }
+}

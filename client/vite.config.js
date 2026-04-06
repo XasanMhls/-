@@ -15,5 +15,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
+    // Relative paths — нужно для Electron (file:// protocol)
+    base: process.env.ELECTRON ? './' : '/',
   },
 });
