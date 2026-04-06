@@ -177,19 +177,6 @@ export default function Login() {
             </Button>
           </form>
 
-          <div style={{
-            marginTop: 24,
-            padding: '12px 14px',
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-md)',
-            fontSize: 'var(--text-xs)',
-            color: 'var(--text-muted)',
-            lineHeight: 1.6,
-          }}>
-            <strong style={{ color: 'var(--text-secondary)' }}>Demo:</strong>{' '}
-            muhibullohxasan@gmail.com / Xasan7311
-          </div>
         </motion.div>
       </div>
     </div>
