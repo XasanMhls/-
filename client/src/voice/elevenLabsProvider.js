@@ -1,53 +1,77 @@
 /**
  * ElevenLabs TTS Provider
- * Calls /api/tts (backend proxy) → returns audio/mpeg → plays via Audio element.
+ * Calls ElevenLabs API directly from the browser (no backend proxy needed).
  * Voice: Adam (eleven_multilingual_v2) — clear, professional, Jarvis-like.
  */
 
-import api from '../services/api.js';
+const VOICE_ID = 'pNInz6obpgDQGcFmaJgB'; // Adam
+const MODEL    = 'eleven_multilingual_v2';
+const API_KEY  = import.meta.env.VITE_ELEVENLABS_API_KEY;
 
 let currentAudio = null;
 
 export const elevenLabsProvider = {
   isSupported() {
-    return true;
+    return !!API_KEY;
   },
 
   async speak(text, lang = 'ru', _options = {}) {
     this.stop();
 
-    try {
-      const response = await api.post(
-        '/tts',
-        { text, lang },
-        { responseType: 'blob' }
-      );
-
-      const blob = response.data;
-      const url = URL.createObjectURL(blob);
-
-      return new Promise((resolve) => {
-        const audio = new Audio(url);
-        currentAudio = audio;
-
-        const cleanup = () => {
-          URL.revokeObjectURL(url);
-          currentAudio = null;
-          resolve();
-        };
-
-        audio.onended = cleanup;
-        audio.onerror = cleanup;
-
-        audio.play().catch((err) => {
-          console.warn('[ElevenLabs] autoplay blocked — click page first:', err.message);
-          cleanup();
-        });
-      });
-    } catch (err) {
-      console.warn('[ElevenLabs] speak() error:', err.message);
-      throw err; // propagate so VoiceProvider can fallback to browser TTS
+    if (!API_KEY) {
+      throw new Error('[ElevenLabs] VITE_ELEVENLABS_API_KEY not set');
     }
+
+    const trimmed = text.trim().slice(0, 500);
+
+    const response = await fetch(
+      `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
+      {
+        method: 'POST',
+        headers: {
+          'xi-api-key': API_KEY,
+          'Content-Type': 'application/json',
+          'Accept': 'audio/mpeg',
+        },
+        body: JSON.stringify({
+          text: trimmed,
+          model_id: MODEL,
+          voice_settings: {
+            stability: 0.55,
+            similarity_boost: 0.80,
+            style: 0.10,
+            use_speaker_boost: true,
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const err = await response.text();
+      throw new Error(`[ElevenLabs] API error ${response.status}: ${err}`);
+    }
+
+    const blob = await response.blob();
+    const url  = URL.createObjectURL(blob);
+
+    return new Promise((resolve) => {
+      const audio = new Audio(url);
+      currentAudio = audio;
+
+      const cleanup = () => {
+        URL.revokeObjectURL(url);
+        currentAudio = null;
+        resolve();
+      };
+
+      audio.onended = cleanup;
+      audio.onerror = cleanup;
+
+      audio.play().catch((err) => {
+        console.warn('[ElevenLabs] autoplay blocked:', err.message);
+        cleanup();
+      });
+    });
   },
 
   stop() {
@@ -69,7 +93,7 @@ export const elevenLabsProvider = {
     };
     const t = templates[lang] || templates.en;
     const parts = [`${t.word}: ${reminder.title}`];
-    if (reminder.guestName) parts.push(`${t.for} ${reminder.guestName}`);
+    if (reminder.guestName)  parts.push(`${t.for} ${reminder.guestName}`);
     if (reminder.description) parts.push(reminder.description);
     return parts.join('. ');
   },

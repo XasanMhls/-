@@ -8,3 +8,4 @@ client/public/downloads/chronos-windows.zip
 client/public/downloads/*.exe
 client/public/downloads/*.apk
 dist-electron/
+client/.env
