@@ -18,26 +18,55 @@ import { playSound } from '../voice/soundEngine.js';
 import { voice } from '../voice/VoiceProvider.js';
 import { useNotifications } from '../hooks/useNotifications.js';
 
+const SECTION_COLORS = {
+  User:    { from: '#B9FF66', to: '#d4ff99' },
+  Palette: { from: '#4a9eff', to: '#B9FF66' },
+  Bell:    { from: '#f5a524', to: '#fb923c' },
+  Volume2: { from: '#23d18b', to: '#4a9eff' },
+  Key:     { from: '#f04e65', to: '#f472b6' },
+  Download:{ from: '#23d18b', to: '#B9FF66' },
+};
+
 function Section({ title, icon: Icon, children }) {
+  const colors = SECTION_COLORS[Icon.displayName || Icon.name] || { from: 'var(--accent)', to: '#d4ff99' };
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
       style={{
         background: 'var(--bg-surface)',
         border: '1px solid var(--border)',
         borderRadius: 'var(--radius-xl)',
-        overflow: 'hidden',
-        marginBottom: 20,
+        marginBottom: 16,
+        boxShadow: 'var(--shadow-sm)',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '18px 24px', borderBottom: '1px solid var(--border)' }}>
-        <div style={{ width: 32, height: 32, borderRadius: 'var(--radius-md)', background: 'var(--accent-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Icon size={16} color="var(--accent)" />
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '16px 22px',
+        borderBottom: '1px solid var(--border)',
+        background: 'linear-gradient(to right, rgba(108,99,255,0.03), transparent)',
+      }}>
+        <div style={{
+          width: 36,
+          height: 36,
+          borderRadius: 'var(--radius-md)',
+          background: `linear-gradient(135deg, ${colors.from}, ${colors.to})`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: `0 4px 12px ${colors.from}40`,
+          flexShrink: 0,
+        }}>
+          <Icon size={16} color="white" />
         </div>
-        <h3 style={{ fontSize: 'var(--text-base)', fontWeight: 600 }}>{title}</h3>
+        <h3 style={{ fontSize: 'var(--text-base)', fontWeight: 600, letterSpacing: '-0.01em' }}>{title}</h3>
       </div>
-      <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 18 }}>
         {children}
       </div>
     </motion.div>
@@ -76,8 +105,9 @@ export default function Settings() {
       const updated = await authService.updateProfile({ preferences: { [key]: value } });
       updateUser(updated.user);
       if (key === 'language') setLanguage(value);
-    } catch {
-      toast.error(t('errors.generic'));
+    } catch (err) {
+      console.error('handlePreference error:', err);
+      toast.error(err.response?.data?.error || err.message || t('errors.generic'));
     }
   };
 
@@ -142,7 +172,7 @@ export default function Settings() {
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       <Header title={t('settings.title')} />
 
-      <div className="settings-content" style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', maxWidth: 720 }}>
+      <div className="settings-content" style={{ flex: 1, overflowY: 'auto', overflowX: 'visible', padding: '24px 28px', maxWidth: 720, paddingBottom: 80 }}>
 
         {/* Profile */}
         <Section title={t('settings.profile')} icon={User}>
@@ -216,7 +246,10 @@ export default function Settings() {
               variant="secondary"
               icon={<Volume2 size={15} />}
               onClick={() => {
-                const lang = localStorage.getItem('chronos_lang') || i18n.language || 'ru';
+                const voiceLang = prefs.voiceLanguage || 'auto';
+                const lang = voiceLang === 'auto'
+                  ? (localStorage.getItem('chronos_lang') || i18n.language || 'ru').split('-')[0]
+                  : voiceLang;
                 const testTexts = {
                   ru: 'Голосовое напоминание активировано. Chronos готов.',
                   en: 'Voice reminder activated. Chronos is ready.',

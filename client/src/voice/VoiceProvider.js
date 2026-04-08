@@ -1,68 +1,166 @@
 /**
  * VoiceProvider — abstraction layer for TTS.
- * Switch provider here to use ElevenLabs, OpenAI TTS, etc.
  *
- * Provider interface:
- *   isSupported(): boolean
- *   speak(text, lang, options?): Promise<void>
- *   stop(): void
- *   getVoices(lang?): Voice[]
- *   buildReminderText(reminder, lang): string
+ * Fallback chain:
+ *   1. Preferred provider for lang (ElevenLabs for ru/en, browser TTS for uz)
+ *   2. Browser TTS with detected language
+ *   3. Browser TTS with English voices
+ *   4. Browser TTS with any available voice
+ *   5. Silent fail (never throws to caller)
+ *
+ * Language detection: Cyrillic script → ru (or uz if Uzbek Cyrillic chars present),
+ * Latin script → en (or uz if Uzbek Latin markers present). Default = 'en'.
  */
 import { elevenLabsProvider } from './elevenLabsProvider.js';
 import { speechSynthesisProvider } from './speechSynthesisProvider.js';
 
-// ElevenLabs — основной провайдер (Jarvis-like голос, мультиязычный)
-// Если запрос упадёт — fallback на браузерный TTS
-const activeProvider = elevenLabsProvider;
+const SUPPORTED_LANGS = new Set(['ru', 'en', 'uz']);
+
+function getProviderForLang(lang) {
+  // Use browser TTS directly when no ElevenLabs key is configured
+  if (!elevenLabsProvider.isSupported()) return speechSynthesisProvider;
+  if (lang === 'uz') return speechSynthesisProvider;
+  return elevenLabsProvider;
+}
 
 export const voice = {
-  isSupported: () => activeProvider.isSupported(),
+  isSupported: () => elevenLabsProvider.isSupported() || speechSynthesisProvider.isSupported(),
 
-  async speak(text, lang = 'ru', options = {}) {
+  async speak(text, lang = 'en', options = {}) {
+    const safeLang = SUPPORTED_LANGS.has(lang) ? lang : 'en';
+    const provider = getProviderForLang(safeLang);
+
     try {
-      return await activeProvider.speak(text, lang, options);
+      await provider.speak(text, safeLang, options);
     } catch (err) {
-      // Fallback to browser TTS if ElevenLabs fails
-      console.warn('[VoiceProvider] ElevenLabs failed, falling back to browser TTS:', err?.message);
-      if (speechSynthesisProvider.isSupported()) {
-        return speechSynthesisProvider.speak(text, lang, options);
+      console.warn('[VoiceProvider] provider failed:', err?.message);
+      // Fallback to browser TTS if a different provider was used
+      if (provider !== speechSynthesisProvider && speechSynthesisProvider.isSupported()) {
+        try {
+          await speechSynthesisProvider.speak(text, safeLang, options);
+        } catch (e2) {
+          console.warn('[VoiceProvider] browser TTS fallback also failed:', e2?.message);
+        }
       }
     }
   },
 
-  stop: () => activeProvider.stop?.(),
+  stop: () => {
+    elevenLabsProvider.stop?.();
+    speechSynthesisProvider.stop?.();
+  },
 
-  getVoices: (lang) => activeProvider.getVoices?.(lang) || [],
+  getVoices: (lang) => getProviderForLang(lang ?? 'en').getVoices?.(lang) || [],
 
   buildReminderText: (reminder, lang) =>
-    activeProvider.buildReminderText(reminder, lang),
+    getProviderForLang(SUPPORTED_LANGS.has(lang) ? lang : 'en').buildReminderText(reminder, lang ?? 'en'),
 
+  /**
+   * Speak a reminder using the best available language and provider.
+   * Never throws — all errors are caught and logged silently.
+   */
   async speakReminder(reminder) {
-    // Priority: reminder explicit lang → app language setting → auto-detect from text
-    let lang;
-    if (reminder.language && reminder.language !== 'auto') {
-      lang = reminder.language;
-    } else {
-      lang = localStorage.getItem('chronos_lang') || detectLanguage(reminder);
+    const lang = resolveLang(reminder);
+    const provider = getProviderForLang(lang);
+    const text = provider.buildReminderText(reminder, lang);
+
+    // Attempt 1: preferred provider
+    try {
+      return await provider.speak(text, lang);
+    } catch (err) {
+      console.warn(`[VoiceProvider] ${lang} provider failed:`, err?.message);
     }
-    const text = activeProvider.buildReminderText(reminder, lang);
-    return activeProvider.speak(text, lang);
+
+    if (!speechSynthesisProvider.isSupported()) {
+      console.warn('[VoiceProvider] Web Speech API not available — voice skipped');
+      return;
+    }
+
+    // Attempt 2: browser TTS with same language
+    if (provider !== speechSynthesisProvider) {
+      try {
+        return await speechSynthesisProvider.speak(text, lang);
+      } catch (err) {
+        console.warn('[VoiceProvider] browser TTS failed for', lang, ':', err?.message);
+      }
+    }
+
+    // Attempt 3: browser TTS with English as fallback language
+    if (lang !== 'en') {
+      try {
+        const enText = speechSynthesisProvider.buildReminderText(reminder, 'en');
+        return await speechSynthesisProvider.speak(enText, 'en');
+      } catch (err) {
+        console.warn('[VoiceProvider] English browser TTS fallback failed:', err?.message);
+      }
+    }
+
+    // All attempts exhausted — silent fail (sound + toast still work)
   },
 };
 
+/* ─── Language resolution ────────────────────────────────── */
+
 /**
- * Auto-detect language from text content.
- * Simple heuristic: check for Cyrillic vs Latin characters.
+ * Resolve language for a reminder:
+ *   1. reminder.language (explicit user setting, not 'auto')
+ *   2. localStorage chronos_lang (app UI language)
+ *   3. Auto-detect from text content
+ *   4. English default
+ */
+function resolveLang(reminder) {
+  if (reminder.language && reminder.language !== 'auto' && SUPPORTED_LANGS.has(reminder.language)) {
+    return reminder.language;
+  }
+
+  const stored = localStorage.getItem('chronos_lang');
+  if (stored && SUPPORTED_LANGS.has(stored)) return stored;
+
+  return detectLanguage(reminder);
+}
+
+/**
+ * Auto-detect language from reminder text.
+ *
+ * Algorithm:
+ * - Count Cyrillic vs Latin characters to determine primary script
+ * - In Cyrillic text: check for Uzbek Cyrillic exclusive letters (Ўў Ҳҳ Ққ Ғғ)
+ * - In Latin text: check for Uzbek Latin markers (ʻ ʼ) or common Uzbek words
+ * - Ambiguous / no text → English (safe default for international users)
  */
 function detectLanguage(reminder) {
-  const text = `${reminder.title} ${reminder.description || ''}`;
-  const cyrillic = /[\u0400-\u04FF]/.test(text);
-  if (!cyrillic) return 'en';
+  const text = `${reminder.title || ''} ${reminder.description || ''}`.trim();
 
-  // Uzbek-specific characters
-  const uzbekChars = /[ğşçüöıƏəÜÖŞİĞÇ]/i.test(text);
-  if (uzbekChars) return 'uz';
+  if (!text) return 'en';
 
-  return 'ru';
+  const cyrillicCount = (text.match(/[\u0400-\u04FF]/g) || []).length;
+  const latinCount    = (text.match(/[a-zA-Z]/g) || []).length;
+  const totalAlpha    = cyrillicCount + latinCount;
+
+  if (totalAlpha === 0) return 'en';
+
+  const cyrillicRatio = cyrillicCount / totalAlpha;
+
+  if (cyrillicRatio >= 0.5) {
+    // Predominantly Cyrillic — Uzbek Cyrillic has unique chars not in Russian
+    // Ўў = U+040E/U+045E, Ҳҳ = U+04B2/U+04B3, Ққ = U+049A/U+049B, Ғғ = U+0492/U+0493
+    if (/[ЎўҲҳҚқҒғ]/.test(text)) return 'uz';
+    return 'ru';
+  }
+
+  if (cyrillicRatio <= 0.2) {
+    // Predominantly Latin — check Uzbek Latin script markers
+    // Modern Uzbek Latin: ʻ (U+02BB modifier letter turned comma) and ʼ (U+02BC)
+    // Also accept backtick/apostrophe substitutes like o` g` used in casual writing
+    if (/[ʻʼ]/.test(text)) return 'uz';
+    if (/\b(o[`']|g[`'])\b/i.test(text)) return 'uz';
+
+    // Common short Uzbek function words (unlikely in English/Russian Latin)
+    if (/\b(va|bu|bir|uchun|bilan|kerak|yo[qʻ`']|ham\b|emas|bor\b|siz|men\b|sen\b)\b/i.test(text)) return 'uz';
+
+    return 'en';
+  }
+
+  // Mixed script (e.g. code + human text) — default to English
+  return 'en';
 }

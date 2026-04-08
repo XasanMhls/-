@@ -1,86 +1,93 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LayoutDashboard, Bell, Calendar, Settings, LogOut, ChevronLeft, Clock, Shield, Sun, Moon,
+  LayoutDashboard, Bell, Calendar, Settings, LogOut,
+  ChevronLeft, ChevronRight, Clock, Shield, Sun, Moon,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth.js';
 import useUiStore from '../../store/uiStore.js';
 
-const NAV_ITEMS = [
+const NAV = [
   { to: '/dashboard', icon: LayoutDashboard, key: 'dashboard' },
-  { to: '/reminders', icon: Bell, key: 'reminders' },
-  { to: '/calendar', icon: Calendar, key: 'calendar' },
-  { to: '/settings', icon: Settings, key: 'settings' },
+  { to: '/reminders',  icon: Bell,            key: 'reminders'  },
+  { to: '/calendar',   icon: Calendar,        key: 'calendar'   },
+  { to: '/settings',   icon: Settings,        key: 'settings'   },
 ];
 
 export default function Sidebar() {
   const { t } = useTranslation();
   const { logout, user } = useAuth();
-  const { sidebarOpen, toggleSidebar, setSidebarOpen, theme, setTheme } = useUiStore();
-  const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const { sidebarOpen, toggleSidebar, theme, setTheme } = useUiStore();
+  const isDark = theme !== 'light' && !(theme === 'system' && !window.matchMedia('(prefers-color-scheme: dark)').matches);
   const location = useLocation();
 
-  const W = sidebarOpen ? 236 : 62;
+  const W = sidebarOpen ? 232 : 60;
 
   return (
     <motion.aside
       animate={{ width: W }}
-      transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+      transition={{ type: 'spring', stiffness: 420, damping: 38 }}
       className="sidebar"
       style={{
         height: '100dvh',
         display: 'flex',
         flexDirection: 'column',
-        background: 'var(--bg-surface)',
+        background: 'var(--bg-canvas)',
         borderRight: '1px solid var(--border)',
         overflow: 'hidden',
         flexShrink: 0,
         zIndex: 10,
       }}
     >
-      {/* Logo */}
+      {/* ── Logo bar ── */}
       <div style={{
-        height: 58,
+        height: 56,
         display: 'flex',
         alignItems: 'center',
-        padding: sidebarOpen ? '0 14px' : '0',
+        padding: sidebarOpen ? '0 12px 0 14px' : '0',
         justifyContent: sidebarOpen ? 'space-between' : 'center',
         borderBottom: '1px solid var(--border)',
         flexShrink: 0,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden' }}>
+          {/* Logo mark */}
           <div style={{
-            width: 30,
-            height: 30,
-            borderRadius: 8,
-            background: 'linear-gradient(135deg, #6c63ff, #a78bfa)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            width: 32, height: 32, borderRadius: 9,
+            background: 'linear-gradient(135deg,#B9FF66,#d4ff99)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexShrink: 0,
-            boxShadow: '0 4px 16px rgba(108,99,255,0.35)',
+            boxShadow: '0 0 0 1px rgba(185,255,102,0.3), 0 4px 12px rgba(185,255,102,0.28)',
           }}>
-            <Clock size={14} color="white" strokeWidth={2.5} />
+            <Clock size={15} color="#191A23" strokeWidth={2.5} />
           </div>
+
           <AnimatePresence>
             {sidebarOpen && (
-              <motion.span
-                initial={{ opacity: 0, x: -6 }}
+              <motion.div
+                initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -6 }}
-                transition={{ duration: 0.15 }}
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 16,
-                  fontWeight: 800,
-                  letterSpacing: '-0.03em',
-                  color: 'var(--text-primary)',
-                  whiteSpace: 'nowrap',
-                }}
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.14 }}
+                style={{ overflow: 'hidden' }}
               >
-                Chronos
-              </motion.span>
+                <span style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 15, fontWeight: 800,
+                  letterSpacing: '-0.04em',
+                  color: 'var(--text-primary)',
+                  whiteSpace: 'nowrap', display: 'block',
+                }}>
+                  Chronos
+                </span>
+                <span style={{
+                  fontSize: 10, fontWeight: 600,
+                  letterSpacing: '0.08em', textTransform: 'uppercase',
+                  color: 'var(--text-muted)', whiteSpace: 'nowrap', display: 'block',
+                }}>
+                  Smart Reminders
+                </span>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
@@ -88,77 +95,84 @@ export default function Sidebar() {
         {sidebarOpen && (
           <button
             onClick={toggleSidebar}
+            title="Collapse sidebar"
             style={{
-              width: 26,
-              height: 26,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 'var(--radius-sm)',
-              color: 'var(--text-muted)',
-              cursor: 'pointer',
-              transition: 'background 150ms ease, color 150ms ease',
-              flexShrink: 0,
+              width: 26, height: 26, flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              borderRadius: 6, color: 'var(--text-muted)', cursor: 'pointer',
+              transition: 'background 140ms, color 140ms',
             }}
             onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-surface-2)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
             onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; }}
           >
-            <ChevronLeft size={15} />
+            <ChevronLeft size={14} />
+          </button>
+        )}
+
+        {!sidebarOpen && (
+          <button
+            onClick={toggleSidebar}
+            title="Expand sidebar"
+            style={{
+              position: 'absolute', bottom: 0, right: -12,
+              width: 20, height: 20, borderRadius: '50%',
+              background: 'var(--bg-surface)', border: '1px solid var(--border)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'var(--text-muted)', cursor: 'pointer',
+              transition: 'background 140ms, color 140ms',
+              zIndex: 1,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent-subtle)'; e.currentTarget.style.color = 'var(--accent)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-surface)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+          >
+            <ChevronRight size={10} />
           </button>
         )}
       </div>
 
-      {/* Nav */}
-      <nav style={{ flex: 1, padding: '10px 8px', display: 'flex', flexDirection: 'column', gap: 1, overflowY: 'auto' }}>
-        {NAV_ITEMS.map(({ to, icon: Icon, key }) => {
-          const isActive = location.pathname.startsWith(to);
+      {/* ── Nav ── */}
+      <nav style={{ flex: 1, padding: '8px 6px', display: 'flex', flexDirection: 'column', gap: 1, overflowY: 'auto' }}>
+        {NAV.map(({ to, icon: Icon, key }) => {
+          const active = location.pathname.startsWith(to);
           return (
             <NavLink
               key={to}
               to={to}
-              onClick={() => {}}
               style={{
                 position: 'relative',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 9,
-                padding: sidebarOpen ? '8px 10px' : '8px',
+                gap: 10,
+                padding: sidebarOpen ? '9px 10px 9px 12px' : '9px',
                 justifyContent: sidebarOpen ? 'flex-start' : 'center',
-                borderRadius: 'var(--radius-md)',
+                borderRadius: 8,
                 textDecoration: 'none',
-                fontWeight: isActive ? 600 : 400,
-                fontSize: 'var(--text-sm)',
-                color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
-                background: 'transparent',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                transition: 'color 150ms ease',
+                fontSize: 13,
+                fontWeight: active ? 600 : 450,
+                color: active ? 'var(--text-primary)' : 'var(--text-muted)',
+                background: active ? 'var(--bg-surface)' : 'transparent',
+                boxShadow: active ? '0 1px 3px rgba(0,0,0,0.1), inset 0 0 0 1px var(--border)' : 'none',
+                whiteSpace: 'nowrap', overflow: 'hidden',
+                transition: 'color 140ms, background 140ms, box-shadow 140ms',
               }}
-              onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = 'var(--text-secondary)'; }}
-              onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = 'var(--text-muted)'; }}
+              onMouseEnter={e => { if (!active) { e.currentTarget.style.background = 'var(--bg-surface-2)'; e.currentTarget.style.color = 'var(--text-secondary)'; } }}
+              onMouseLeave={e => { if (!active) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; } }}
             >
-              {isActive && (
+              {/* Active left-bar accent */}
+              {active && (
                 <motion.span
-                  layoutId="nav-indicator"
-                  transition={{ type: 'spring', stiffness: 500, damping: 42 }}
+                  layoutId="nav-accent"
+                  transition={{ type: 'spring', stiffness: 500, damping: 40 }}
                   style={{
-                    position: 'absolute',
-                    inset: 0,
-                    borderRadius: 'var(--radius-md)',
-                    background: 'linear-gradient(135deg, rgba(108,99,255,0.15) 0%, rgba(108,99,255,0.06) 100%)',
-                    border: '1px solid rgba(108,99,255,0.22)',
-                    zIndex: 0,
+                    position: 'absolute', left: 0, top: '20%', bottom: '20%',
+                    width: 3, borderRadius: '0 2px 2px 0',
+                    background: 'var(--accent)',
                   }}
                 />
               )}
               <Icon
                 size={16}
-                style={{
-                  flexShrink: 0,
-                  position: 'relative',
-                  zIndex: 1,
-                  color: isActive ? 'var(--accent)' : 'inherit',
-                }}
+                style={{ flexShrink: 0, color: active ? 'var(--accent)' : 'inherit' }}
               />
               <AnimatePresence>
                 {sidebarOpen && (
@@ -167,7 +181,6 @@ export default function Sidebar() {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.12 }}
-                    style={{ position: 'relative', zIndex: 1 }}
                   >
                     {t(`nav.${key}`)}
                   </motion.span>
@@ -177,47 +190,32 @@ export default function Sidebar() {
           );
         })}
 
-        {/* Admin link */}
+        {/* Admin */}
         {user?.isAdmin && (() => {
-          const isActive = location.pathname.startsWith('/admin');
+          const active = location.pathname.startsWith('/admin');
           return (
             <NavLink
               to="/admin"
-              onClick={() => {}}
               style={{
                 position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 9,
-                padding: sidebarOpen ? '8px 10px' : '8px',
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: sidebarOpen ? '9px 10px 9px 12px' : '9px',
                 justifyContent: sidebarOpen ? 'flex-start' : 'center',
-                borderRadius: 'var(--radius-md)',
-                textDecoration: 'none',
-                fontWeight: isActive ? 600 : 400,
-                fontSize: 'var(--text-sm)',
-                color: isActive ? 'var(--accent)' : 'var(--text-muted)',
-                background: isActive ? 'var(--accent-subtle)' : 'transparent',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                transition: 'color 150ms ease, background 150ms ease',
-                marginTop: 8,
-                borderTop: '1px solid var(--border)',
-                paddingTop: 10,
+                borderRadius: 8, textDecoration: 'none',
+                fontSize: 13, fontWeight: active ? 600 : 450,
+                color: active ? 'var(--accent)' : 'var(--text-muted)',
+                background: active ? 'var(--accent-subtle)' : 'transparent',
+                marginTop: 10, whiteSpace: 'nowrap', overflow: 'hidden',
+                transition: 'color 140ms, background 140ms',
               }}
-              onMouseEnter={e => { if (!isActive) { e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.background = 'var(--accent-subtle)'; } }}
-              onMouseLeave={e => { if (!isActive) { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.background = 'transparent'; } }}
+              onMouseEnter={e => { if (!active) { e.currentTarget.style.background = 'var(--accent-subtle)'; e.currentTarget.style.color = 'var(--accent)'; } }}
+              onMouseLeave={e => { if (!active) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; } }}
             >
-              <Shield size={16} style={{ flexShrink: 0, position: 'relative', zIndex: 1 }} />
+              <Shield size={16} style={{ flexShrink: 0 }} />
               <AnimatePresence>
                 {sidebarOpen && (
-                  <motion.span
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.12 }}
-                    style={{ position: 'relative', zIndex: 1 }}
-                  >
-                    Admin Panel
+                  <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.12 }}>
+                    Admin
                   </motion.span>
                 )}
               </AnimatePresence>
@@ -226,35 +224,30 @@ export default function Sidebar() {
         })()}
       </nav>
 
-      {/* Theme toggle */}
-      <div style={{ padding: '6px 8px 0', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
+      {/* ── Bottom controls ── */}
+      <div style={{ borderTop: '1px solid var(--border)', padding: '6px 6px 4px', flexShrink: 0 }}>
+        {/* Theme toggle */}
         <button
           onClick={() => setTheme(isDark ? 'light' : 'dark')}
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 9,
-            padding: sidebarOpen ? '8px 10px' : '8px',
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: sidebarOpen ? '8px 10px 8px 12px' : '8px',
             justifyContent: sidebarOpen ? 'flex-start' : 'center',
-            width: '100%',
-            borderRadius: 'var(--radius-md)',
-            color: 'var(--text-muted)',
-            fontSize: 'var(--text-sm)',
-            fontWeight: 400,
-            cursor: 'pointer',
-            transition: 'background 150ms ease, color 150ms ease',
+            width: '100%', borderRadius: 8,
+            color: 'var(--text-muted)', fontSize: 13, fontWeight: 450,
+            cursor: 'pointer', transition: 'background 140ms, color 140ms',
           }}
           onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-surface-2)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
           onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; }}
         >
           <motion.div
             key={isDark ? 'sun' : 'moon'}
-            initial={{ rotate: -20, opacity: 0 }}
-            animate={{ rotate: 0, opacity: 1 }}
-            transition={{ duration: 0.2 }}
+            initial={{ rotate: -20, opacity: 0, scale: 0.8 }}
+            animate={{ rotate: 0, opacity: 1, scale: 1 }}
+            transition={{ duration: 0.18 }}
             style={{ flexShrink: 0, display: 'flex' }}
           >
-            {isDark ? <Sun size={16} /> : <Moon size={16} />}
+            {isDark ? <Sun size={15} /> : <Moon size={15} />}
           </motion.div>
           <AnimatePresence>
             {sidebarOpen && (
@@ -266,64 +259,64 @@ export default function Sidebar() {
         </button>
       </div>
 
-      {/* User + Logout */}
-      <div style={{ padding: '4px 8px 10px', flexShrink: 0 }}>
-        {sidebarOpen && user && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 9,
-            padding: '8px 10px',
-            borderRadius: 'var(--radius-md)',
-            marginBottom: 2,
-          }}>
+      {/* ── User card ── */}
+      <div style={{ padding: '2px 6px 10px', flexShrink: 0 }}>
+        {sidebarOpen && user ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '8px 10px', borderRadius: 8, marginBottom: 2,
+              background: 'var(--bg-surface-2)',
+              border: '1px solid var(--border)',
+            }}
+          >
             <div style={{
-              width: 30,
-              height: 30,
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #6c63ff, #a78bfa)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              fontWeight: 800,
-              fontSize: 12,
-              flexShrink: 0,
-              boxShadow: '0 2px 10px rgba(108,99,255,0.35)',
+              width: 32, height: 32, borderRadius: 10, flexShrink: 0,
+              background: 'linear-gradient(135deg,#B9FF66,#d4ff99)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#191A23', fontWeight: 800, fontSize: 13,
+              boxShadow: '0 2px 8px rgba(185,255,102,0.3)',
             }}>
-              {user.name?.[0]?.toUpperCase() || '?'}
+              {user.name?.[0]?.toUpperCase() ?? '?'}
             </div>
-            <div style={{ overflow: 'hidden' }}>
-              <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div style={{ overflow: 'hidden', flex: 1 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {user.name}
               </div>
-              <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {user.email}
               </div>
             </div>
+          </motion.div>
+        ) : !sidebarOpen && user ? (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: 10,
+              background: 'linear-gradient(135deg,#B9FF66,#d4ff99)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#191A23', fontWeight: 800, fontSize: 13,
+            }}>
+              {user.name?.[0]?.toUpperCase() ?? '?'}
+            </div>
           </div>
-        )}
+        ) : null}
 
         <button
           onClick={logout}
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 9,
-            padding: sidebarOpen ? '8px 10px' : '8px',
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: sidebarOpen ? '8px 10px 8px 12px' : '8px',
             justifyContent: sidebarOpen ? 'flex-start' : 'center',
-            width: '100%',
-            borderRadius: 'var(--radius-md)',
-            color: 'var(--text-muted)',
-            fontSize: 'var(--text-sm)',
-            fontWeight: 400,
-            cursor: 'pointer',
-            transition: 'background 150ms ease, color 150ms ease',
+            width: '100%', borderRadius: 8,
+            color: 'var(--text-muted)', fontSize: 13, fontWeight: 450,
+            cursor: 'pointer', transition: 'background 140ms, color 140ms',
           }}
           onMouseEnter={e => { e.currentTarget.style.background = 'var(--danger-subtle)'; e.currentTarget.style.color = 'var(--danger)'; }}
           onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; }}
         >
-          <LogOut size={16} style={{ flexShrink: 0 }} />
+          <LogOut size={15} style={{ flexShrink: 0 }} />
           <AnimatePresence>
             {sidebarOpen && (
               <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.12 }}>

@@ -48,7 +48,7 @@ export default function AdminDashboard() {
           sub="logged in last 24h" />
         <StatCard label="Overdue Reminders" value={stats?.overdueCount} icon={AlertTriangle} color="#ef4444"
           sub={stats?.overdueCount > 0 ? 'need attention' : null} />
-        <StatCard label="New Users Today" value={stats?.newUsersToday} icon={UserPlus} color="#a78bfa" />
+        <StatCard label="New Users Today" value={stats?.newUsersToday} icon={UserPlus} color="#B9FF66" />
       </div>
     </div>
   );

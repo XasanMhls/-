@@ -2,24 +2,27 @@
  * speechSynthesis Voice Provider
  * Tuned for broad Android/Huawei compatibility + natural prosody.
  *
- * Key Huawei/Android fixes:
- *  - keepAlive interval resumes synthesis if it pauses (Android screen-dim bug)
- *  - Hard timeout so speak() always resolves (onend never fires on some devices)
- *  - Graceful fallback when no voices are installed
- *  - voiceschanged listener uses both addEventListener + onvoiceschanged for compat
+ * Fallback priority for voices:
+ *   1. Best scored voice for requested language
+ *   2. Best scored English voice (if requested lang ≠ en and no lang voice available)
+ *   3. First available voice (last resort — better than silence)
+ *   4. null → browser speaks with lang hint only (some browsers still work)
+ *
+ * Android/Huawei fixes:
+ *   - keepAlive interval resumes synthesis if it pauses (screen-dim bug)
+ *   - Hard timeout so speak() always resolves (onend never fires on some devices)
+ *   - voiceschanged listener uses both addEventListener + onvoiceschanged for compat
  */
 
 const LANG_CODES = {
   ru: ['ru-RU', 'ru'],
   en: ['en-US', 'en-GB', 'en-AU', 'en'],
-  // Узбекского голоса в браузерах нет — используем русский neural
-  uz: ['ru-RU', 'ru', 'uz-UZ', 'uz'],
+  uz: ['uz-UZ', 'uz', 'ru-RU', 'ru'],
 };
 
-// Приоритет: мужские Neural голоса звучат чётко и профессионально (как Jarvis)
 const TOP_VOICE_NAMES = {
   ru: [
-    'microsoft dmitri online (natural)',  // лучший — чёткий мужской
+    'microsoft dmitri online (natural)',
     'microsoft dmitri online',
     'dmitri online (natural)',
     'dmitri online',
@@ -32,7 +35,7 @@ const TOP_VOICE_NAMES = {
     'google русский',
   ],
   en: [
-    'microsoft guy online (natural)',     // лучший — профессиональный мужской
+    'microsoft guy online (natural)',
     'microsoft guy online',
     'guy online (natural)',
     'guy online',
@@ -48,24 +51,25 @@ const TOP_VOICE_NAMES = {
     'daniel',
     'alex',
   ],
-  // Для узбекского — лучший доступный мужской русский голос
   uz: [
+    'microsoft dilnoza online (natural)',
+    'microsoft dilnoza online',
+    'dilnoza online (natural)',
+    'dilnoza online',
+    'dilnoza',
     'microsoft dmitri online (natural)',
     'microsoft dmitri online',
     'dmitri online (natural)',
     'dmitri online',
     'dmitri',
-    'microsoft irina online (natural)',
-    'irina online',
-    'irina',
   ],
 };
 
 const QUALITY_KEYWORDS = ['natural', 'neural', 'online', 'enhanced', 'premium', 'wavenet', 'studio'];
 
-// Max time we wait for speak() to complete before resolving anyway (Android bug)
+/** Hard timeout — Android/Huawei onend may never fire */
 const SPEAK_TIMEOUT_MS = 12_000;
-// How often we ping resume() to fight Android's background-pause bug
+/** Interval to fight Android background-pause synthesis bug */
 const KEEP_ALIVE_INTERVAL_MS = 800;
 
 function scoreVoice(v, lang) {
@@ -77,40 +81,53 @@ function scoreVoice(v, lang) {
   }
   for (const kw of QUALITY_KEYWORDS) if (name.includes(kw)) score += 15;
   if (name.includes('microsoft')) score += 6;
-  if (name.includes('google')) score += 5;
-  if (!v.localService) score += 3;
+  if (name.includes('google'))    score += 5;
+  if (!v.localService)            score += 3;
   return score;
 }
 
-function getBestVoice(lang) {
+/**
+ * Get the best voice for a language with graceful fallback.
+ * @param {string} lang - 'ru' | 'en' | 'uz'
+ * @param {boolean} [allowEnFallback=true] - try English voices if lang not found
+ * @returns {SpeechSynthesisVoice|null}
+ */
+function getBestVoice(lang, allowEnFallback = true) {
   const voices = window.speechSynthesis?.getVoices?.() || [];
   if (!voices.length) return null;
 
   const preferred = LANG_CODES[lang] || LANG_CODES.en;
   const candidates = [];
+
   for (const code of preferred) {
-    const matches = voices.filter(
-      v => v.lang === code || v.lang.startsWith(code.split('-')[0])
-    );
+    const root = code.split('-')[0];
+    const matches = voices.filter(v => v.lang === code || v.lang.startsWith(root));
     candidates.push(...matches);
   }
 
-  if (!candidates.length) {
-    // Fallback: pick any voice rather than silence
-    return voices[0];
+  if (candidates.length) {
+    const unique = [...new Map(candidates.map(v => [v.name, v])).values()];
+    unique.sort((a, b) => scoreVoice(b, lang) - scoreVoice(a, lang));
+    return unique[0];
   }
 
-  const unique = [...new Map(candidates.map(v => [v.name, v])).values()];
-  unique.sort((a, b) => scoreVoice(b, lang) - scoreVoice(a, lang));
-  return unique[0];
+  // No voice for requested language — fall back to English
+  if (allowEnFallback && lang !== 'en') {
+    console.warn(`[Voice] No voice found for "${lang}", trying English voices`);
+    const enVoice = getBestVoice('en', false);
+    if (enVoice) return enVoice;
+  }
+
+  // Last resort: any available voice (browser may handle lang hint on its own)
+  console.warn('[Voice] No language-specific voice found, using first available voice');
+  return voices[0] ?? null;
 }
 
 let voicesLoaded = false;
 
 function waitForVoices() {
   return new Promise(resolve => {
-    // Already loaded
-    const current = window.speechSynthesis?.getVoices() || [];
+    const current = window.speechSynthesis?.getVoices() ?? [];
     if (current.length > 0) { voicesLoaded = true; resolve(current); return; }
 
     let resolved = false;
@@ -121,15 +138,12 @@ function waitForVoices() {
       resolve(voices);
     };
 
-    // Both event styles for maximum browser compat (Huawei uses older Chromium)
     const handler = () => done(window.speechSynthesis.getVoices());
-    try {
-      window.speechSynthesis.addEventListener('voiceschanged', handler);
-    } catch (_) { /* ignore */ }
+    try { window.speechSynthesis.addEventListener('voiceschanged', handler); } catch (_) {}
     window.speechSynthesis.onvoiceschanged = handler;
 
     // Hard timeout — some Huawei builds never fire voiceschanged
-    setTimeout(() => done(window.speechSynthesis?.getVoices() || []), 3000);
+    setTimeout(() => done(window.speechSynthesis?.getVoices() ?? []), 3000);
   });
 }
 
@@ -146,55 +160,52 @@ function preprocessText(text, lang) {
   return t;
 }
 
-function humanizeProsody(base) {
-  const jitter = () => (Math.random() - 0.5) * 0.04;
-  return {
-    rate: Math.max(0.75, Math.min(1.0, base.rate + jitter())),
-    pitch: Math.max(0.85, Math.min(1.15, base.pitch + jitter())),
-  };
-}
-
 export const speechSynthesisProvider = {
   isSupported() {
     return typeof window !== 'undefined' && 'speechSynthesis' in window;
   },
 
-  async speak(text, lang = 'ru', options = {}) {
-    if (!this.isSupported()) return;
+  async speak(text, lang = 'en', options = {}) {
+    if (!this.isSupported()) {
+      console.warn('[Voice] Web Speech API is not supported in this browser');
+      return;
+    }
 
-    // Cancel any ongoing utterance
-    try { window.speechSynthesis.cancel(); } catch (_) { /* ignore */ }
+    // Cancel any ongoing utterance first
+    try { window.speechSynthesis.cancel(); } catch (_) {}
 
     if (!voicesLoaded) {
       await waitForVoices();
     }
 
-    const allVoices = window.speechSynthesis?.getVoices() || [];
-
-    // If device has zero voices, skip TTS silently — sound + toast still work
+    const allVoices = window.speechSynthesis?.getVoices() ?? [];
     if (allVoices.length === 0) {
-      console.warn('[Voice] No TTS voices installed on this device (Huawei / no Google TTS)');
+      console.warn('[Voice] No TTS voices installed on this device — skipping speech');
       return;
     }
 
     const processed = preprocessText(text, lang);
     const utterance = new SpeechSynthesisUtterance(processed);
 
+    // Set language hint so browser can select a voice even if we can't find one
+    utterance.lang = LANG_CODES[lang]?.[0] ?? LANG_CODES.en[0];
+
     const voice = getBestVoice(lang);
-    if (voice) utterance.voice = voice;
+    if (voice) {
+      utterance.voice = voice;
+      // If we fell back to a different language voice, update the lang hint to match
+      if (!LANG_CODES[lang]?.some(c => voice.lang.startsWith(c.split('-')[0]))) {
+        const voiceLangRoot = voice.lang.split('-')[0];
+        utterance.lang = voice.lang;
+        console.info(`[Voice] Using "${voice.name}" (${voice.lang}) for "${lang}" text`);
+      }
+    }
 
-    utterance.lang = LANG_CODES[lang]?.[0] || 'en-US';
+    utterance.rate   = options.rate   ?? 1.05;
+    utterance.pitch  = options.pitch  ?? 0.9;
+    utterance.volume = options.volume ?? 1.0;
 
-    const base = {
-      rate: options.rate ?? 1.05,   // Чуть быстрее — звучит чётче и увереннее
-      pitch: options.pitch ?? 0.9,  // Чуть ниже тон — как у Jarvis/профессиональный AI
-      volume: options.volume ?? 1.0,
-    };
-    utterance.rate = base.rate;
-    utterance.pitch = base.pitch;
-    utterance.volume = base.volume;
-
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       let done = false;
       let keepAliveId = null;
 
@@ -205,67 +216,62 @@ export const speechSynthesisProvider = {
         resolve();
       };
 
-      utterance.onend = finish;
-      utterance.onerror = (e) => {
-        // interrupted/canceled are normal — resolve cleanly
-        if (e.error === 'interrupted' || e.error === 'canceled') finish();
-        else { console.warn('[Voice] SpeechSynthesis error:', e.error); finish(); }
-      };
-
-      // Hard timeout — Android/Huawei onend may never fire
       const timeout = setTimeout(() => {
-        console.warn('[Voice] speak() timed out — resolving anyway');
+        console.warn('[Voice] speak() timed out — resolving');
         finish();
       }, SPEAK_TIMEOUT_MS);
 
-      // Override finish to also clear the timeout
-      const origFinish = finish;
-      // reassign references
-      utterance.onend = () => { clearTimeout(timeout); origFinish(); };
-      utterance.onerror = (e) => { clearTimeout(timeout); if (e.error !== 'interrupted' && e.error !== 'canceled') console.warn('[Voice] error:', e.error); origFinish(); };
+      utterance.onend = () => { clearTimeout(timeout); finish(); };
+      utterance.onerror = (e) => {
+        clearTimeout(timeout);
+        // interrupted/canceled are normal lifecycle events, not real errors
+        if (e.error !== 'interrupted' && e.error !== 'canceled') {
+          console.warn('[Voice] SpeechSynthesis error:', e.error);
+        }
+        finish();
+      };
 
       try {
         window.speechSynthesis.speak(utterance);
       } catch (e) {
-        console.warn('[Voice] speak() threw:', e);
+        console.warn('[Voice] speak() threw synchronously:', e?.message);
         clearTimeout(timeout);
         finish();
         return;
       }
 
-      // Android background-pause bug: synthesis pauses when screen dims.
-      // Periodically call resume() to keep it alive.
+      // Android background-pause bug: periodically call resume()
       keepAliveId = setInterval(() => {
         if (done) { clearInterval(keepAliveId); return; }
         try {
           if (window.speechSynthesis.paused) window.speechSynthesis.resume();
-        } catch (_) { /* ignore */ }
+        } catch (_) {}
       }, KEEP_ALIVE_INTERVAL_MS);
     });
   },
 
   stop() {
-    try { window.speechSynthesis?.cancel(); } catch (_) { /* ignore */ }
+    try { window.speechSynthesis?.cancel(); } catch (_) {}
   },
 
   getVoices(lang) {
-    const voices = window.speechSynthesis?.getVoices() || [];
+    const voices = window.speechSynthesis?.getVoices() ?? [];
     if (!lang) return voices;
-    const codes = LANG_CODES[lang] || [];
+    const codes = LANG_CODES[lang] ?? [];
     return voices
       .filter(v => codes.some(c => v.lang.startsWith(c.split('-')[0])))
       .sort((a, b) => scoreVoice(b, lang) - scoreVoice(a, lang));
   },
 
-  buildReminderText(reminder, lang = 'ru') {
+  buildReminderText(reminder, lang = 'en') {
     const templates = {
       ru: { reminder: 'Напоминание', for: 'для' },
-      en: { reminder: 'Reminder', for: 'for' },
-      uz: { reminder: 'Eslatma', for: 'uchun' },
+      en: { reminder: 'Reminder',    for: 'for' },
+      uz: { reminder: 'Eslatma',     for: 'uchun' },
     };
-    const t = templates[lang] || templates.en;
+    const t = templates[lang] ?? templates.en;
     const parts = [`${t.reminder}: ${reminder.title}`];
-    if (reminder.guestName) parts.push(`${t.for} ${reminder.guestName}`);
+    if (reminder.guestName)   parts.push(`${t.for} ${reminder.guestName}`);
     if (reminder.description) parts.push(reminder.description);
     return parts.join('. ');
   },

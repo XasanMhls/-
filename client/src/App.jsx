@@ -18,6 +18,7 @@ import AdminUsers from './pages/admin/AdminUsers.jsx';
 import AdminReminders from './pages/admin/AdminReminders.jsx';
 import { useEffect } from 'react';
 import { unlockAudio } from './voice/soundEngine.js';
+import { useSelectionSpeech } from './hooks/useSelectionSpeech.js';
 
 function RequireAuth({ children }) {
   const { isAuthenticated } = useAuthStore();
@@ -43,6 +44,9 @@ export default function App() {
   useEffect(() => {
     applyTheme(theme);
   }, [theme]);
+
+  // Speak selected text via AI voice
+  useSelectionSpeech();
 
   // Unlock AudioContext on first user interaction (required on iOS/Android)
   useEffect(() => {

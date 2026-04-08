@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Volume2, VolumeX, Play } from 'lucide-react';
+import { Play } from 'lucide-react';
 import Input from '../ui/Input.jsx';
 import Select from '../ui/Select.jsx';
 import Toggle from '../ui/Toggle.jsx';
 import Button from '../ui/Button.jsx';
 import { COLOR_TAG_VALUES, TIMEZONES, REMINDER_TEMPLATES } from '../../utils/constants.js';
 import { formatForInput } from '../../utils/date.js';
-import { voice } from '../../voice/VoiceProvider.js';
 import { playSound } from '../../voice/soundEngine.js';
+import { useSpeech } from '../../hooks/useSpeech.js';
+import { useLanguageDetect, langLabel, langFlag } from '../../hooks/useLanguageDetect.js';
 
 const DEFAULT_FORM = {
   title: '',
@@ -30,7 +31,9 @@ export default function ReminderForm({ initial, onSubmit, onCancel, loading }) {
   const { t, i18n } = useTranslation();
   const [form, setForm] = useState({ ...DEFAULT_FORM, ...initial });
   const [errors, setErrors] = useState({});
-  const [testingVoice, setTestingVoice] = useState(false);
+
+  const { speak, speaking: testingVoice, stop: stopVoice } = useSpeech();
+  const { lang: detectedLang, confidence, detect: detectTitle, label: langLbl, flag: langFlg } = useLanguageDetect(form.title);
 
   useEffect(() => {
     if (initial) {
@@ -67,19 +70,12 @@ export default function ReminderForm({ initial, onSubmit, onCancel, loading }) {
     onSubmit(data);
   };
 
-  const testVoice = async () => {
-    setTestingVoice(true);
-    try {
-      if (form.soundEnabled) playSound(form.sound);
-      if (form.voiceEnabled) {
-        const lang = form.language === 'auto' ? i18n.language : form.language;
-        await voice.speak(
-          form.title || t('reminder.titlePlaceholder'),
-          lang
-        );
-      }
-    } finally {
-      setTestingVoice(false);
+  const testVoice = () => {
+    if (testingVoice) { stopVoice(); return; }
+    if (form.soundEnabled) playSound(form.sound);
+    if (form.voiceEnabled) {
+      const lang = form.language !== 'auto' ? form.language : (detectedLang || i18n.language.split('-')[0]);
+      speak(form.title || t('reminder.titlePlaceholder'), lang);
     }
   };
 
@@ -153,14 +149,28 @@ export default function ReminderForm({ initial, onSubmit, onCancel, loading }) {
 
       <div style={{ height: 1, background: 'var(--border)' }} />
 
-      {/* Title */}
-      <Input
-        label={t('reminder.title')}
-        value={form.title}
-        onChange={setEvent('title')}
-        placeholder={t('reminder.titlePlaceholder')}
-        error={errors.title}
-      />
+      {/* Title + language auto-detect */}
+      <div>
+        <Input
+          label={t('reminder.title')}
+          value={form.title}
+          onChange={e => { setEvent('title')(e); detectTitle(e.target.value); }}
+          placeholder={t('reminder.titlePlaceholder')}
+          error={errors.title}
+        />
+        {form.title.length >= 3 && confidence >= 0.55 && (
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 5,
+            marginTop: 6, padding: '3px 9px', borderRadius: 20,
+            background: 'var(--accent-subtle)', border: '1px solid var(--accent-subtle-hover)',
+            fontSize: 11, fontWeight: 700, color: 'var(--accent-text)',
+            letterSpacing: '0.04em',
+          }}>
+            <span style={{ fontSize: 13 }}>{langFlg}</span>
+            {langLbl} detected
+          </div>
+        )}
+      </div>
 
       {/* Guest name */}
       <Input

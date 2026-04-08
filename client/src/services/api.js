@@ -24,12 +24,12 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 globally
+// Handle 401 globally (skip redirect on auth pages)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Clear auth and redirect to login
+    const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/register';
+    if (error.response?.status === 401 && !isAuthPage) {
       localStorage.removeItem('chronos_auth');
       window.location.href = '/login';
     }
