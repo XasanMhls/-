@@ -371,13 +371,13 @@ function TutorialContent({ C, t }) {
   const [active, setActive] = useState(0);
   const step = tutSteps[active];
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 28, alignItems: 'start' }}>
+    <div className="landing-tutorial-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 28, alignItems: 'start' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {tutSteps.map((s, i) => (
           <TutorialCard key={s.n} step={s} index={i} isActive={active === i} onClick={() => setActive(i)} C={C} t={t} />
         ))}
       </div>
-      <div style={{ position: 'sticky', top: 100 }}>
+      <div className="landing-tutorial-preview" style={{ position: 'sticky', top: 100 }}>
         <motion.div key={active} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.28, ease: 'easeOut' }}>
           <div style={{ marginBottom: 18, padding: '13px 18px', borderRadius: 12, background: step.bg, border: `1px solid ${step.border}`, display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ width: 30, height: 30, borderRadius: 9, background: `linear-gradient(135deg,${step.color},${step.color}99)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -701,7 +701,7 @@ export default function Landing() {
             </SectionH2>
           </motion.div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+          <div className="landing-featured-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
             {FEATURES.filter(f => f.featured).map(({ icon: Icon, color, bg, border, title, body }, i) => (
               <motion.div key={i} {...vu(i * 0.1)} style={{ padding: '40px 36px', borderRadius: 18, background: C.card, border: `1px solid ${C.border}`, position: 'relative', overflow: 'hidden', transition: 'transform 220ms, border-color 220ms, box-shadow 220ms', cursor: 'default', boxShadow: isDark ? 'none' : '0 2px 12px rgba(0,0,0,0.06)' }}
                 onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.borderColor = border; e.currentTarget.style.boxShadow = isDark ? `0 24px 60px rgba(0,0,0,0.4)` : `0 16px 48px rgba(0,0,0,0.1)`; }}
@@ -739,7 +739,7 @@ export default function Landing() {
       </section>
 
       {/* ══ HOW IT WORKS ══ */}
-      <section id="how" style={{ position: 'relative', zIndex: 1, padding: '100px 40px', borderTop: `1px solid ${C.border}`, background: C.sectionAlt }}>
+      <section id="how" className="landing-section" style={{ position: 'relative', zIndex: 1, padding: '100px 40px', borderTop: `1px solid ${C.border}`, background: C.sectionAlt }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <motion.div {...vu()} style={{ textAlign: 'center', marginBottom: 64 }}>
             <SectionBadge color="#34d399" bg="rgba(52,211,153,0.1)" border="rgba(52,211,153,0.2)"><Play size={10} fill="#34d399" /> {t('landing.howBadge')}</SectionBadge>
@@ -762,7 +762,7 @@ export default function Landing() {
       </section>
 
       {/* ══ TUTORIAL ══ */}
-      <section id="tutorial" style={{ position: 'relative', zIndex: 1, padding: '100px 40px', borderTop: `1px solid ${C.border}` }}>
+      <section id="tutorial" className="landing-tutorial-section" style={{ position: 'relative', zIndex: 1, padding: '100px 40px', borderTop: `1px solid ${C.border}` }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <motion.div {...vu()} style={{ textAlign: 'center', marginBottom: 64 }}>
             <SectionBadge color="#B9FF66" bg="rgba(185,255,102,0.1)" border="rgba(185,255,102,0.2)"><BookOpen size={11} /> {t('landing.tutorialBadge')}</SectionBadge>
@@ -781,7 +781,7 @@ export default function Landing() {
       </section>
 
       {/* ══ TESTIMONIALS ══ */}
-      <section style={{ position: 'relative', zIndex: 1, padding: '100px 40px', borderTop: `1px solid ${C.border}`, background: C.sectionAlt }}>
+      <section className="landing-section" style={{ position: 'relative', zIndex: 1, padding: '100px 40px', borderTop: `1px solid ${C.border}`, background: C.sectionAlt }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <motion.div {...vu()} style={{ textAlign: 'center', marginBottom: 64 }}>
             <SectionBadge color="#fbbf24" bg="rgba(251,191,36,0.1)" border="rgba(251,191,36,0.2)"><Star size={11} fill="#fbbf24" /> {t('landing.testBadge')}</SectionBadge>
@@ -808,7 +808,7 @@ export default function Landing() {
       </section>
 
       {/* ══ PRICING ══ */}
-      <section style={{ position: 'relative', zIndex: 1, padding: '100px 40px', borderTop: `1px solid ${C.border}` }}>
+      <section className="landing-section" style={{ position: 'relative', zIndex: 1, padding: '100px 40px', borderTop: `1px solid ${C.border}` }}>
         <div style={{ maxWidth: 800, margin: '0 auto', textAlign: 'center' }}>
           <motion.div {...vu()}>
             <SectionBadge color="#34d399" bg="rgba(52,211,153,0.1)" border="rgba(52,211,153,0.2)">{t('landing.priceBadge')}</SectionBadge>
@@ -840,7 +840,7 @@ export default function Landing() {
       </section>
 
       {/* ══ DOWNLOAD ══ */}
-      <section id="download" style={{ position: 'relative', zIndex: 1, padding: '100px 40px', borderTop: `1px solid ${C.border}`, background: C.sectionAlt }}>
+      <section id="download" className="landing-section" style={{ position: 'relative', zIndex: 1, padding: '100px 40px', borderTop: `1px solid ${C.border}`, background: C.sectionAlt }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', textAlign: 'center' }}>
           <motion.div {...vu()}>
             <SectionBadge color="#38bdf8" bg="rgba(56,189,248,0.1)" border="rgba(56,189,248,0.2)"><Download size={11} /> {t('landing.dlBadge')}</SectionBadge>
@@ -886,7 +886,7 @@ export default function Landing() {
       </section>
 
       {/* ══ FAQ ══ */}
-      <section id="faq" style={{ position: 'relative', zIndex: 1, padding: '100px 40px', borderTop: `1px solid ${C.border}` }}>
+      <section id="faq" className="landing-section" style={{ position: 'relative', zIndex: 1, padding: '100px 40px', borderTop: `1px solid ${C.border}` }}>
         <div style={{ maxWidth: 860, margin: '0 auto' }}>
           <motion.div {...vu()} style={{ textAlign: 'center', marginBottom: 56 }}>
             <SectionBadge>FAQ</SectionBadge>

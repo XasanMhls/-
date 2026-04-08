@@ -19,7 +19,7 @@ const SUPPORTED_LANGS = new Set(['ru', 'en', 'uz']);
 function getProviderForLang(lang) {
   // Use browser TTS directly when no ElevenLabs key is configured
   if (!elevenLabsProvider.isSupported()) return speechSynthesisProvider;
-  if (lang === 'uz') return speechSynthesisProvider;
+  // ElevenLabs eleven_multilingual_v2 supports Uzbek Latin natively
   return elevenLabsProvider;
 }
 

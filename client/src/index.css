@@ -571,6 +571,13 @@ img, svg { display: block; }
   .landing-stats-grid > *:nth-child(4) { border-top: 1px solid rgba(255,255,255,0.06) !important; }
 
   .landing-footer-grid { grid-template-columns: 1fr 1fr !important; gap: 32px !important; }
+
+  /* Tutorial: stack on tablet */
+  .landing-tutorial-grid { grid-template-columns: 1fr !important; }
+  .landing-tutorial-preview { position: static !important; }
+
+  /* Featured cards: stack on tablet */
+  .landing-featured-grid { grid-template-columns: 1fr !important; }
 }
 
 /* ── Mobile ≤ 768px ── */
@@ -594,6 +601,13 @@ img, svg { display: block; }
 
   .landing-footer-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
   .landing-testimonials-grid { grid-template-columns: 1fr !important; }
+
+  /* Landing sections: reduce padding on mobile */
+  .landing-section { padding: 60px 16px !important; }
+  .landing-tutorial-section { padding: 60px 16px !important; }
+  .landing-tutorial-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+  .landing-tutorial-preview { position: static !important; }
+  .landing-featured-grid { grid-template-columns: 1fr !important; }
 
   /* ─ App inner pages ─ */
   .inner-page-content { padding: 14px 14px !important; }

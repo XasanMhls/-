@@ -17,7 +17,7 @@
 const LANG_CODES = {
   ru: ['ru-RU', 'ru'],
   en: ['en-US', 'en-GB', 'en-AU', 'en'],
-  uz: ['uz-UZ', 'uz', 'ru-RU', 'ru'],
+  uz: ['uz-UZ', 'uz'],
 };
 
 const TOP_VOICE_NAMES = {
@@ -57,11 +57,11 @@ const TOP_VOICE_NAMES = {
     'dilnoza online (natural)',
     'dilnoza online',
     'dilnoza',
-    'microsoft dmitri online (natural)',
-    'microsoft dmitri online',
-    'dmitri online (natural)',
-    'dmitri online',
-    'dmitri',
+    'microsoft sardor online (natural)',
+    'microsoft sardor online',
+    'sardor online (natural)',
+    'sardor online',
+    'sardor',
   ],
 };
 
@@ -156,6 +156,9 @@ function preprocessText(text, lang) {
   }
   if (lang === 'en') {
     t = t.replace(/\s+(and|but|or|so|because|when|if)\s+/gi, ', $1 ');
+  }
+  if (lang === 'uz') {
+    t = t.replace(/\s+(va|lekin|yoki|chunki|agar|shuning uchun)\s+/gi, ', $1 ');
   }
   return t;
 }
