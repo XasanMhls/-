@@ -90,7 +90,7 @@ export default function ReminderDetail() {
   const tagColor = COLOR_TAG_VALUES[reminder.colorTag] || 'transparent';
 
   return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px' }}>
+    <div className="reminder-detail-page" style={{ flex: 1, overflowY: 'auto', padding: '24px 28px' }}>
       {/* Back */}
       <button
         onClick={() => navigate(-1)}
@@ -124,7 +124,7 @@ export default function ReminderDetail() {
           }}
         >
           {/* Header */}
-          <div style={{ padding: '28px 32px', borderBottom: '1px solid var(--border)' }}>
+          <div className="reminder-detail-header" style={{ padding: '28px 32px', borderBottom: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 16 }}>
               <button
                 onClick={handleToggleComplete}
@@ -191,7 +191,7 @@ export default function ReminderDetail() {
           </div>
 
           {/* Body */}
-          <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div className="reminder-detail-body" style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 20 }}>
             {reminder.description && (
               <div>
                 <h4 style={{ fontSize: 'var(--text-xs)', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
@@ -246,7 +246,7 @@ export default function ReminderDetail() {
           </div>
 
           {/* Actions */}
-          <div style={{ padding: '20px 32px', borderTop: '1px solid var(--border)', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <div className="reminder-detail-actions" style={{ padding: '20px 32px', borderTop: '1px solid var(--border)', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             <Button onClick={() => setEditOpen(true)} variant="secondary">
               {t('actions.edit')}
             </Button>

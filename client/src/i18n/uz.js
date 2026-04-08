@@ -133,6 +133,7 @@ export default {
       tip1: 'Muhim hodisani o\'tkazib yubormaslik uchun ovozli eslatma qo\'shing.',
       tip2: 'Bugungi vazifalar uchun "Shoshilinch" ustuvorligidan foydalaning.',
       tip3: 'Takrorlanuvchi eslatmalar bir marta o\'rnatiladi va abadiy ishlaydi.',
+      tip4: 'Sahifadagi istalgan matnni belgilang — uni ovoz chiqarib o\'qish uchun tugma paydo bo\'ladi.',
       allDone: 'Hammasi tayyor!',
       allDoneHint: 'Muddati o\'tgan eslatmalar yo\'q. Ajoyib!',
     },

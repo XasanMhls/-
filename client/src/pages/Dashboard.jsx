@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Bell, Clock, CheckCircle2, AlertTriangle, TrendingUp, Plus, Zap, ArrowRight, Flame, Star } from 'lucide-react';
+import { Bell, Clock, CheckCircle2, AlertTriangle, TrendingUp, Plus, Zap, ArrowRight, Flame, Star, Volume2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth.js';
 import { useReminders } from '../hooks/useReminders.js';
 import Header from '../components/layout/Header.jsx';
@@ -299,6 +299,7 @@ export default function Dashboard() {
     { icon: Bell,       color: '#B9FF66', key: 'tip1' },
     { icon: Zap,        color: '#f59e0b', key: 'tip2' },
     { icon: TrendingUp, color: '#34d399', key: 'tip3' },
+    { icon: Volume2,    color: '#4a9eff', key: 'tip4' },
   ];
 
   const dateStr = new Date().toLocaleDateString(i18n.language, {

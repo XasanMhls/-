@@ -133,6 +133,7 @@ export default {
       tip1: 'Add a voice reminder so you never miss an important event.',
       tip2: 'Use "Urgent" priority for tasks due today.',
       tip3: 'Recurring reminders are set once and repeat forever.',
+      tip4: 'Select any text on the page — a speaker button will appear to read it aloud.',
       allDone: 'All clear!',
       allDoneHint: 'No overdue reminders. Great job!',
     },

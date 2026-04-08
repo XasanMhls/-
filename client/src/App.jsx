@@ -48,18 +48,34 @@ export default function App() {
   // Speak selected text via AI voice
   useSelectionSpeech();
 
-  // Unlock AudioContext on first user interaction (required on iOS/Android)
+  // Unlock AudioContext + SpeechSynthesis on first user interaction (required on iOS/Android)
   useEffect(() => {
     const unlock = () => {
       unlockAudio();
+      // Unlock SpeechSynthesis on mobile — must be called from user gesture
+      if (window.speechSynthesis) {
+        try {
+          const u = new SpeechSynthesisUtterance(' ');
+          u.volume = 0;
+          u.rate = 10;
+          window.speechSynthesis.speak(u);
+          setTimeout(() => { try { window.speechSynthesis.cancel(); } catch (_) {} }, 50);
+        } catch (_) {}
+      }
       document.removeEventListener('touchstart', unlock);
+      document.removeEventListener('touchend', unlock);
       document.removeEventListener('mousedown', unlock);
+      document.removeEventListener('click', unlock);
     };
     document.addEventListener('touchstart', unlock, { passive: true });
+    document.addEventListener('touchend', unlock, { passive: true });
     document.addEventListener('mousedown', unlock);
+    document.addEventListener('click', unlock);
     return () => {
       document.removeEventListener('touchstart', unlock);
+      document.removeEventListener('touchend', unlock);
       document.removeEventListener('mousedown', unlock);
+      document.removeEventListener('click', unlock);
     };
   }, []);
 
@@ -76,7 +92,7 @@ export default function App() {
   return (
     <>
       <Toaster
-        position="bottom-right"
+        position={window.innerWidth < 768 ? "bottom-center" : "bottom-right"}
         gutter={8}
         toastOptions={{
           duration: 3500,

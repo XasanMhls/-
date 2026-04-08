@@ -102,7 +102,7 @@ export default function ReminderForm({ initial, onSubmit, onCancel, loading }) {
   }));
 
   return (
-    <form onSubmit={handleSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <form onSubmit={handleSubmit} style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: 20 }}>
 
       {/* Templates */}
       <div>
@@ -220,7 +220,7 @@ export default function ReminderForm({ initial, onSubmit, onCancel, loading }) {
       />
 
       {/* Priority + Repeat */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <div className="reminder-form-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
         <Select
           label={t('reminder.priority')}
           value={form.priority}
@@ -264,7 +264,7 @@ export default function ReminderForm({ initial, onSubmit, onCancel, loading }) {
 
       {/* Sound + Voice */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div style={{ display: 'flex', gap: 20 }}>
+        <div className="reminder-form-toggles" style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
           <Toggle
             checked={form.voiceEnabled}
             onChange={set('voiceEnabled')}
@@ -283,7 +283,7 @@ export default function ReminderForm({ initial, onSubmit, onCancel, loading }) {
         </div>
 
         {(form.voiceEnabled || form.soundEnabled) && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div className="reminder-form-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             {form.soundEnabled && (
               <Select
                 label={t('reminder.sound')}

@@ -32,12 +32,12 @@ export default function Header({ title, onAddClick }) {
       top: 0,
       zIndex: 5,
     }}>
-      {/* Mobile menu toggle */}
+      {/* Menu toggle — always visible when sidebar is closed */}
       {!sidebarOpen && (
         <button
           onClick={toggleSidebar}
           style={{
-            width: 34, height: 34, flexShrink: 0,
+            width: 36, height: 36, flexShrink: 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             borderRadius: 8, color: 'var(--text-secondary)',
             cursor: 'pointer', transition: 'background var(--t-fast)',
@@ -45,7 +45,7 @@ export default function Header({ title, onAddClick }) {
           onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface-2)'}
           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
         >
-          <Menu size={17} />
+          <Menu size={18} />
         </button>
       )}
 

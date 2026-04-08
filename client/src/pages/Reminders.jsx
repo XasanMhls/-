@@ -57,7 +57,7 @@ export default function Reminders() {
 
         {/* ── Filter bar ── */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <div style={{
+          <div className="filter-bar-inner" style={{
             display: 'flex', gap: 4, flex: 1, flexWrap: 'wrap',
             background: 'var(--bg-surface)',
             border: '1px solid var(--border)',

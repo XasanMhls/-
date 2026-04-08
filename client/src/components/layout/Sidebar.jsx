@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -15,18 +16,33 @@ const NAV = [
   { to: '/settings',   icon: Settings,        key: 'settings'   },
 ];
 
+function useIsMobile(breakpoint = 768) {
+  const [mobile, setMobile] = useState(() => window.innerWidth < breakpoint);
+  useEffect(() => {
+    const handler = () => setMobile(window.innerWidth < breakpoint);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, [breakpoint]);
+  return mobile;
+}
+
 export default function Sidebar() {
   const { t } = useTranslation();
   const { logout, user } = useAuth();
-  const { sidebarOpen, toggleSidebar, theme, setTheme } = useUiStore();
+  const { sidebarOpen, toggleSidebar, setSidebarOpen, theme, setTheme } = useUiStore();
   const isDark = theme !== 'light' && !(theme === 'system' && !window.matchMedia('(prefers-color-scheme: dark)').matches);
   const location = useLocation();
+  const isMobile = useIsMobile();
 
-  const W = sidebarOpen ? 232 : 60;
+  // On mobile, sidebar is always full-width when open, hidden when closed
+  const W = isMobile ? (sidebarOpen ? 260 : 0) : (sidebarOpen ? 232 : 60);
 
   return (
     <motion.aside
-      animate={{ width: W }}
+      animate={isMobile
+        ? { x: sidebarOpen ? 0 : -260, width: 260 }
+        : { x: 0, width: W }
+      }
       transition={{ type: 'spring', stiffness: 420, damping: 38 }}
       className="sidebar"
       style={{
@@ -38,6 +54,12 @@ export default function Sidebar() {
         overflow: 'hidden',
         flexShrink: 0,
         zIndex: 10,
+        ...(isMobile ? {
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: 260,
+        } : {}),
       }}
     >
       {/* ── Logo bar ── */}
@@ -45,8 +67,8 @@ export default function Sidebar() {
         height: 56,
         display: 'flex',
         alignItems: 'center',
-        padding: sidebarOpen ? '0 12px 0 14px' : '0',
-        justifyContent: sidebarOpen ? 'space-between' : 'center',
+        padding: (sidebarOpen || isMobile) ? '0 12px 0 14px' : '0',
+        justifyContent: (sidebarOpen || isMobile) ? 'space-between' : 'center',
         borderBottom: '1px solid var(--border)',
         flexShrink: 0,
       }}>
@@ -63,7 +85,7 @@ export default function Sidebar() {
           </div>
 
           <AnimatePresence>
-            {sidebarOpen && (
+            {(sidebarOpen || isMobile) && (
               <motion.div
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -92,10 +114,10 @@ export default function Sidebar() {
           </AnimatePresence>
         </div>
 
-        {sidebarOpen && (
+        {(sidebarOpen || isMobile) && (
           <button
-            onClick={toggleSidebar}
-            title="Collapse sidebar"
+            onClick={() => isMobile ? setSidebarOpen(false) : toggleSidebar()}
+            title={isMobile ? "Close menu" : "Collapse sidebar"}
             style={{
               width: 26, height: 26, flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -109,7 +131,7 @@ export default function Sidebar() {
           </button>
         )}
 
-        {!sidebarOpen && (
+        {!sidebarOpen && !isMobile && (
           <button
             onClick={toggleSidebar}
             title="Expand sidebar"
@@ -134,6 +156,7 @@ export default function Sidebar() {
       <nav style={{ flex: 1, padding: '8px 6px', display: 'flex', flexDirection: 'column', gap: 1, overflowY: 'auto' }}>
         {NAV.map(({ to, icon: Icon, key }) => {
           const active = location.pathname.startsWith(to);
+          const expanded = sidebarOpen || isMobile;
           return (
             <NavLink
               key={to}
@@ -143,8 +166,8 @@ export default function Sidebar() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 10,
-                padding: sidebarOpen ? '9px 10px 9px 12px' : '9px',
-                justifyContent: sidebarOpen ? 'flex-start' : 'center',
+                padding: expanded ? '9px 10px 9px 12px' : '9px',
+                justifyContent: expanded ? 'flex-start' : 'center',
                 borderRadius: 8,
                 textDecoration: 'none',
                 fontSize: 13,
@@ -175,7 +198,7 @@ export default function Sidebar() {
                 style={{ flexShrink: 0, color: active ? 'var(--accent)' : 'inherit' }}
               />
               <AnimatePresence>
-                {sidebarOpen && (
+                {(sidebarOpen || isMobile) && (
                   <motion.span
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -199,8 +222,8 @@ export default function Sidebar() {
               style={{
                 position: 'relative',
                 display: 'flex', alignItems: 'center', gap: 10,
-                padding: sidebarOpen ? '9px 10px 9px 12px' : '9px',
-                justifyContent: sidebarOpen ? 'flex-start' : 'center',
+                padding: (sidebarOpen || isMobile) ? '9px 10px 9px 12px' : '9px',
+                justifyContent: (sidebarOpen || isMobile) ? 'flex-start' : 'center',
                 borderRadius: 8, textDecoration: 'none',
                 fontSize: 13, fontWeight: active ? 600 : 450,
                 color: active ? 'var(--accent)' : 'var(--text-muted)',
@@ -213,7 +236,7 @@ export default function Sidebar() {
             >
               <Shield size={16} style={{ flexShrink: 0 }} />
               <AnimatePresence>
-                {sidebarOpen && (
+                {(sidebarOpen || isMobile) && (
                   <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.12 }}>
                     Admin
                   </motion.span>
@@ -231,8 +254,8 @@ export default function Sidebar() {
           onClick={() => setTheme(isDark ? 'light' : 'dark')}
           style={{
             display: 'flex', alignItems: 'center', gap: 10,
-            padding: sidebarOpen ? '8px 10px 8px 12px' : '8px',
-            justifyContent: sidebarOpen ? 'flex-start' : 'center',
+            padding: (sidebarOpen || isMobile) ? '8px 10px 8px 12px' : '8px',
+            justifyContent: (sidebarOpen || isMobile) ? 'flex-start' : 'center',
             width: '100%', borderRadius: 8,
             color: 'var(--text-muted)', fontSize: 13, fontWeight: 450,
             cursor: 'pointer', transition: 'background 140ms, color 140ms',
@@ -250,7 +273,7 @@ export default function Sidebar() {
             {isDark ? <Sun size={15} /> : <Moon size={15} />}
           </motion.div>
           <AnimatePresence>
-            {sidebarOpen && (
+            {(sidebarOpen || isMobile) && (
               <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.12 }}>
                 {isDark ? 'Light mode' : 'Dark mode'}
               </motion.span>
@@ -261,7 +284,7 @@ export default function Sidebar() {
 
       {/* ── User card ── */}
       <div style={{ padding: '2px 6px 10px', flexShrink: 0 }}>
-        {sidebarOpen && user ? (
+        {(sidebarOpen || isMobile) && user ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -290,7 +313,7 @@ export default function Sidebar() {
               </div>
             </div>
           </motion.div>
-        ) : !sidebarOpen && user ? (
+        ) : !sidebarOpen && !isMobile && user ? (
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}>
             <div style={{
               width: 32, height: 32, borderRadius: 10,
@@ -307,8 +330,8 @@ export default function Sidebar() {
           onClick={logout}
           style={{
             display: 'flex', alignItems: 'center', gap: 10,
-            padding: sidebarOpen ? '8px 10px 8px 12px' : '8px',
-            justifyContent: sidebarOpen ? 'flex-start' : 'center',
+            padding: (sidebarOpen || isMobile) ? '8px 10px 8px 12px' : '8px',
+            justifyContent: (sidebarOpen || isMobile) ? 'flex-start' : 'center',
             width: '100%', borderRadius: 8,
             color: 'var(--text-muted)', fontSize: 13, fontWeight: 450,
             cursor: 'pointer', transition: 'background 140ms, color 140ms',
@@ -318,7 +341,7 @@ export default function Sidebar() {
         >
           <LogOut size={15} style={{ flexShrink: 0 }} />
           <AnimatePresence>
-            {sidebarOpen && (
+            {(sidebarOpen || isMobile) && (
               <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.12 }}>
                 {t('nav.logout')}
               </motion.span>
