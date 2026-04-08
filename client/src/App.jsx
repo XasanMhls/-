@@ -19,6 +19,7 @@ import AdminReminders from './pages/admin/AdminReminders.jsx';
 import { useEffect } from 'react';
 import { unlockAudio } from './voice/soundEngine.js';
 import { useSelectionSpeech } from './hooks/useSelectionSpeech.js';
+import AiAssistant from './components/ai/AiAssistant.jsx';
 
 function RequireAuth({ children }) {
   const { isAuthenticated } = useAuthStore();
@@ -132,6 +133,7 @@ export default function App() {
 
         <Route path="*" element={<NotFound />} />
       </Routes>
+      {isAuthenticated && <AiAssistant />}
     </>
   );
 }

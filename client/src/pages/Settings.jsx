@@ -102,7 +102,16 @@ export default function Settings() {
 
   const handlePreference = async (key, value) => {
     try {
-      const updated = await authService.updateProfile({ preferences: { [key]: value } });
+      const prefs = { [key]: value };
+      // When changing interface language, also sync voice language if it's 'auto'
+      if (key === 'language') {
+        const currentVoiceLang = user?.preferences?.voiceLanguage || 'auto';
+        if (currentVoiceLang === 'auto') {
+          // Voice will auto-follow via localStorage — just update localStorage
+        }
+        prefs.voiceLanguage = 'auto'; // Reset to auto so voice follows interface language
+      }
+      const updated = await authService.updateProfile({ preferences: prefs });
       updateUser(updated.user);
       if (key === 'language') setLanguage(value);
     } catch (err) {

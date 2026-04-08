@@ -49,7 +49,14 @@ export default function ReminderForm({ initial, onSubmit, onCancel, loading }) {
   const setEvent = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
   const applyTemplate = (template) => {
-    setForm((f) => ({ ...f, ...template.defaults }));
+    const lang = (i18n.language || 'en').split('-')[0];
+    const templateTitle = template.label[lang] || template.label.en;
+    setForm((f) => ({
+      ...f,
+      ...template.defaults,
+      title: templateTitle,
+    }));
+    detectTitle(templateTitle);
   };
 
   const validate = () => {

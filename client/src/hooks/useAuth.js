@@ -30,8 +30,10 @@ export function useAuth() {
   const login = useCallback(async (credentials) => {
     const { user, token } = await authService.login(credentials);
     setAuth(user, token);
-    const lang = user.preferences?.language || 'ru';
-    if (user.preferences?.language) setLanguage(lang);
+    // Priority: server preference → localStorage (set on landing/login) → fallback 'ru'
+    const storedLang = localStorage.getItem('chronos_lang');
+    const lang = user.preferences?.language || storedLang || 'ru';
+    setLanguage(lang);
     await greet(user.name, lang);
     navigate('/dashboard');
   }, [setAuth, navigate, greet]);
@@ -39,7 +41,9 @@ export function useAuth() {
   const register = useCallback(async (data) => {
     const { user, token } = await authService.register(data);
     setAuth(user, token);
-    const lang = user.preferences?.language || 'ru';
+    const storedLang = localStorage.getItem('chronos_lang');
+    const lang = user.preferences?.language || storedLang || 'ru';
+    setLanguage(lang);
     await greet(user.name, lang);
     navigate('/dashboard');
   }, [setAuth, navigate, greet]);
