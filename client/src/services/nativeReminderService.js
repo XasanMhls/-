@@ -15,6 +15,35 @@ export function areSystemReminderNotificationsManagedNatively() {
   return isNativeReminderPlatform();
 }
 
+// Channel ID used for all reminder notifications.
+// Must match the channelId in scheduled notifications.
+const CHANNEL_ID = 'chronos_reminders';
+let channelCreated = false;
+
+/**
+ * Create the notification channel (Android 8+ / API 26+).
+ * Without a channel, Android silently drops all notifications.
+ * Safe no-op on iOS and older Android.
+ */
+async function ensureNotificationChannel() {
+  if (channelCreated || Capacitor.getPlatform() !== 'android') return;
+  try {
+    await LocalNotifications.createChannel({
+      id: CHANNEL_ID,
+      name: 'Напоминания',
+      description: 'Уведомления о предстоящих напоминаниях',
+      importance: 5,      // IMPORTANCE_HIGH — heads-up notification
+      visibility: 1,      // VISIBILITY_PUBLIC — show on lock screen
+      vibration: true,
+      lights: true,
+      lightColor: '#B9FF66',
+    });
+    channelCreated = true;
+  } catch {
+    // Older plugin versions — ignore
+  }
+}
+
 function hashReminderId(reminderId) {
   let hash = 0;
   const input = String(reminderId || '');
@@ -55,6 +84,9 @@ function writeDeliveryState(state) {
  * Works identically on Android and iOS — the plugin uses AlarmManager under the hood on Android.
  */
 async function syncWithLocalNotifications(reminders) {
+  // Ensure notification channel exists (Android 8+ requirement)
+  await ensureNotificationChannel();
+
   const pending = await LocalNotifications.getPending();
   if (pending.notifications.length) {
     await LocalNotifications.cancel({ notifications: pending.notifications.map(({ id }) => ({ id })) });
@@ -79,7 +111,7 @@ async function syncWithLocalNotifications(reminders) {
           id: hashReminderId(deliveryKey),
           title: reminder.title,
           body: getReminderBody(reminder),
-          // Small delay so the system processes the schedule call before firing.
+          channelId: CHANNEL_ID,
           schedule: { at: new Date(now + 1500), allowWhileIdle: true },
           extra: { route: `/reminders/${reminder._id}` },
         });
@@ -94,6 +126,7 @@ async function syncWithLocalNotifications(reminders) {
       id: hashReminderId(reminder._id),
       title: reminder.title,
       body: getReminderBody(reminder),
+      channelId: CHANNEL_ID,
       schedule: { at: new Date(effectiveAt), allowWhileIdle: true },
       extra: { route: `/reminders/${reminder._id}` },
     });
@@ -162,12 +195,14 @@ export async function showSystemNotification(title, options = {}) {
     const permission = await getSystemNotificationPermission();
     if (permission !== 'granted') return null;
 
+    await ensureNotificationChannel();
     await LocalNotifications.schedule({
       notifications: [
         {
           id: hashReminderId(`${title}:${options.url || Date.now()}`),
           title,
           body: options.body || '',
+          channelId: CHANNEL_ID,
           schedule: { at: new Date(Date.now() + 1000), allowWhileIdle: true },
           extra: { route: options.url || '/' },
         },

@@ -57,4 +57,8 @@
     <!-- Required for AlarmManager to wake the CPU and for vibration -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- Request exemption from battery optimization so AlarmManager and
+         BOOT_COMPLETED receiver survive on Samsung/Xiaomi/Huawei/OPPO -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 </manifest>
