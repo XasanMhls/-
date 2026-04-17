@@ -3,7 +3,7 @@ import { useNotifications } from './useNotifications.js';
 import { voice } from '../voice/VoiceProvider.js';
 import { playSound } from '../voice/soundEngine.js';
 import { reminderService } from '../services/reminderService.js';
-import { areSystemReminderNotificationsManagedNatively, syncAllNativeReminders } from '../services/nativeReminderService.js';
+import { areSystemReminderNotificationsManagedNatively, syncAllNativeReminders, ensureExactAlarmPermission } from '../services/nativeReminderService.js';
 import useAuthStore from '../store/authStore.js';
 import useReminderStore from '../store/reminderStore.js';
 
@@ -93,6 +93,9 @@ export function useReminderScheduler() {
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
         checkReminders();
+        // Re-sync alarms every time app comes to foreground —
+        // catches any changes made while app was in background.
+        syncAllNativeReminders().catch(() => {});
       }
     };
 
@@ -102,7 +105,8 @@ export function useReminderScheduler() {
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    syncAllNativeReminders().catch(() => {});
+    // On auth: request exact alarm permission (Android 12+), then sync.
+    ensureExactAlarmPermission().then(() => syncAllNativeReminders()).catch(() => {});
   }, [isAuthenticated]);
 
   useEffect(() => {

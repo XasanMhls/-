@@ -111,6 +111,29 @@ async function syncWithLocalNotifications(reminders) {
   writeDeliveryState(merged);
 }
 
+/**
+ * On Android 12+ (API 31+) exact alarms require a special permission.
+ * Without it the plugin falls back to setAndAllowWhileIdle which Android
+ * may defer by up to 9 minutes — useless for a reminder app.
+ *
+ * This function checks and, if denied, opens the system Settings page
+ * where the user can grant "Alarms & reminders" access.
+ * Safe no-op on iOS and non-native platforms.
+ */
+export async function ensureExactAlarmPermission() {
+  if (Capacitor.getPlatform() !== 'android') return;
+
+  try {
+    const { exact_alarm } = await LocalNotifications.checkExactNotificationSetting();
+    if (exact_alarm !== 'granted') {
+      // Opens Settings → Special app access → Alarms & reminders
+      await LocalNotifications.changeExactNotificationSetting();
+    }
+  } catch {
+    // Older plugin versions or API < 31 — ignore
+  }
+}
+
 export async function requestSystemNotificationPermission() {
   if (isNativeReminderPlatform()) {
     const current = await LocalNotifications.checkPermissions();

@@ -3,6 +3,12 @@ import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import useReminderStore from '../store/reminderStore.js';
 import { reminderService } from '../services/reminderService.js';
+import { syncAllNativeReminders, isNativeReminderPlatform } from '../services/nativeReminderService.js';
+
+// Fire-and-forget — schedule alarms after any mutation
+const nativeSync = () => {
+  if (isNativeReminderPlatform()) syncAllNativeReminders().catch(() => {});
+};
 
 export function useReminders() {
   const store = useReminderStore();
@@ -38,8 +44,9 @@ export function useReminders() {
   const create = useCallback(async (data) => {
     const { reminder } = await reminderService.create(data);
     store.addReminder(reminder);
-    store.setStats(null); // trigger refresh
+    store.setStats(null);
     toast.success(t('toast.reminderCreated'));
+    nativeSync(); // schedule alarm immediately after create
     return reminder;
   }, [store, t]);
 
@@ -47,6 +54,7 @@ export function useReminders() {
     const { reminder } = await reminderService.update(id, data);
     store.updateReminder(id, reminder);
     toast.success(t('toast.reminderUpdated'));
+    nativeSync(); // reschedule after time/snooze change
     return reminder;
   }, [store, t]);
 
@@ -54,6 +62,7 @@ export function useReminders() {
     await reminderService.delete(id);
     store.removeReminder(id);
     toast.success(t('toast.reminderDeleted'));
+    nativeSync(); // cancel alarm for deleted reminder
   }, [store, t]);
 
   const toggleComplete = useCallback(async (reminder) => {
@@ -61,6 +70,7 @@ export function useReminders() {
       isCompleted: !reminder.isCompleted,
     });
     store.updateReminder(reminder._id, updated);
+    nativeSync(); // cancel alarm when completed
     return updated;
   }, [store]);
 
@@ -76,6 +86,7 @@ export function useReminders() {
     const { reminder } = await reminderService.snooze(id, minutes);
     store.updateReminder(id, reminder);
     toast.success(t('toast.reminderSnoozed', { minutes }));
+    nativeSync(); // reschedule to new snooze time
     return reminder;
   }, [store, t]);
 
