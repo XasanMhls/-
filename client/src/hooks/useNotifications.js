@@ -1,48 +1,47 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import useAuthStore from '../store/authStore.js';
+import {
+  getSystemNotificationPermission,
+  requestSystemNotificationPermission,
+  showSystemNotification,
+} from '../services/nativeReminderService.js';
 
 export function useNotifications() {
   const { user } = useAuthStore();
-  const permRef = useRef(Notification.permission);
+  const permRef = useRef('default');
+  const [permission, setPermission] = useState('default');
 
-  const isSupported = 'Notification' in window;
-  const permission = permRef.current;
+  const isSupported = true;
+
+  useEffect(() => {
+    getSystemNotificationPermission()
+      .then((value) => {
+        permRef.current = value;
+        setPermission(value);
+      })
+      .catch(() => {
+        permRef.current = 'default';
+        setPermission('default');
+      });
+  }, []);
 
   const request = useCallback(async () => {
     if (!isSupported) return 'unsupported';
-    if (Notification.permission === 'granted') return 'granted';
-    const result = await Notification.requestPermission();
+    const result = await requestSystemNotificationPermission();
     permRef.current = result;
+    setPermission(result);
     return result;
   }, [isSupported]);
 
-  const show = useCallback((title, options = {}) => {
-    if (!isSupported || Notification.permission !== 'granted') return null;
+  const show = useCallback(async (title, options = {}) => {
+    if (!isSupported || permRef.current !== 'granted') return null;
     if (!user?.preferences?.notificationsEnabled) return null;
-
-    try {
-      const n = new Notification(title, {
-        icon: '/favicon.svg',
-        badge: '/favicon.svg',
-        requireInteraction: options.requireInteraction ?? false,
-        ...options,
-      });
-
-      n.onclick = () => {
-        window.focus();
-        if (options.url) window.location.href = options.url;
-        n.close();
-      };
-
-      return n;
-    } catch {
-      return null;
-    }
+    return showSystemNotification(title, options).catch(() => null);
   }, [isSupported, user]);
 
   return {
     isSupported,
-    permission: Notification.permission,
+    permission,
     request,
     show,
   };

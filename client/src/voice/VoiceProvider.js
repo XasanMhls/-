@@ -50,6 +50,16 @@ export const voice = {
     speechSynthesisProvider.stop?.();
   },
 
+  pause: () => {
+    elevenLabsProvider.pause?.();
+    speechSynthesisProvider.pause?.();
+  },
+
+  resume: () => {
+    elevenLabsProvider.resume?.();
+    speechSynthesisProvider.resume?.();
+  },
+
   getVoices: (lang) => getProviderForLang(lang ?? 'en').getVoices?.(lang) || [],
 
   buildReminderText: (reminder, lang) =>

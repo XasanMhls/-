@@ -10,30 +10,37 @@
  * - speaking                true while TTS is active
  * - supported               false if neither ElevenLabs nor Web Speech is available
  */
-import { useState, useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 import { voice } from '../voice/VoiceProvider.js';
 import { detectLang } from './useLanguageDetect.js';
+import useSpeechStore from '../store/speechStore.js';
+
+let activeSessionId = 0;
 
 export function useSpeech() {
-  const [speaking, setSpeaking] = useState(false);
-  const [error, setError]       = useState(null);
-  const cancelRef = useRef(false);
-
   const supported = voice.isSupported();
+  const speaking = useSpeechStore((state) => state.speaking);
+  const paused = useSpeechStore((state) => state.paused);
+  const error = useSpeechStore((state) => state.error);
+  const setSpeechState = useSpeechStore((state) => state.setState);
+  const resetSpeech = useSpeechStore((state) => state.reset);
 
   const _withState = useCallback(async (fn) => {
     if (!supported) return;
-    cancelRef.current = false;
-    setSpeaking(true);
-    setError(null);
+    const sessionId = ++activeSessionId;
+    setSpeechState({ speaking: true, paused: false, error: null });
     try {
       await fn();
     } catch (err) {
-      if (!cancelRef.current) setError(err?.message ?? 'Speech failed');
+      if (sessionId === activeSessionId) {
+        setSpeechState({ error: err?.message ?? 'Speech failed' });
+      }
     } finally {
-      if (!cancelRef.current) setSpeaking(false);
+      if (sessionId === activeSessionId) {
+        resetSpeech();
+      }
     }
-  }, [supported]);
+  }, [resetSpeech, setSpeechState, supported]);
 
   /**
    * Speak arbitrary text.
@@ -55,11 +62,22 @@ export function useSpeech() {
 
   /** Cancel current utterance immediately. */
   const stop = useCallback(() => {
-    cancelRef.current = true;
+    activeSessionId += 1;
     voice.stop();
-    setSpeaking(false);
-    setError(null);
-  }, []);
+    resetSpeech();
+  }, [resetSpeech]);
 
-  return { speak, stop, speakReminder, speaking, error, supported };
+  const pause = useCallback(() => {
+    if (!speaking || paused) return;
+    voice.pause?.();
+    setSpeechState({ paused: true, speaking: true });
+  }, [paused, setSpeechState, speaking]);
+
+  const resume = useCallback(() => {
+    if (!speaking || !paused) return;
+    voice.resume?.();
+    setSpeechState({ paused: false, speaking: true });
+  }, [paused, setSpeechState, speaking]);
+
+  return { speak, stop, pause, resume, speakReminder, speaking, paused, error, supported };
 }

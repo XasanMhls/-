@@ -81,6 +81,16 @@ export const elevenLabsProvider = {
     }
   },
 
+  pause() {
+    if (!currentAudio) return;
+    try { currentAudio.pause(); } catch (_) {}
+  },
+
+  resume() {
+    if (!currentAudio) return;
+    currentAudio.play().catch(() => {});
+  },
+
   getVoices() {
     return [{ name: 'Adam (ElevenLabs)', lang: 'multilingual' }];
   },

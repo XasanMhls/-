@@ -68,9 +68,10 @@ const TOP_VOICE_NAMES = {
 const QUALITY_KEYWORDS = ['natural', 'neural', 'online', 'enhanced', 'premium', 'wavenet', 'studio'];
 
 /** Hard timeout — Android/Huawei onend may never fire */
-const SPEAK_TIMEOUT_MS = 12_000;
+const SPEAK_TIMEOUT_MS = 300_000;
 /** Interval to fight Android background-pause synthesis bug */
 const KEEP_ALIVE_INTERVAL_MS = 800;
+let manuallyPaused = false;
 
 function scoreVoice(v, lang) {
   const name = v.name.toLowerCase();
@@ -176,6 +177,7 @@ export const speechSynthesisProvider = {
 
     // Cancel any ongoing utterance first
     try { window.speechSynthesis.cancel(); } catch (_) {}
+    manuallyPaused = false;
 
     if (!voicesLoaded) {
       await waitForVoices();
@@ -247,14 +249,25 @@ export const speechSynthesisProvider = {
       keepAliveId = setInterval(() => {
         if (done) { clearInterval(keepAliveId); return; }
         try {
-          if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+          if (window.speechSynthesis.paused && !manuallyPaused) window.speechSynthesis.resume();
         } catch (_) {}
       }, KEEP_ALIVE_INTERVAL_MS);
     });
   },
 
   stop() {
+    manuallyPaused = false;
     try { window.speechSynthesis?.cancel(); } catch (_) {}
+  },
+
+  pause() {
+    manuallyPaused = true;
+    try { window.speechSynthesis?.pause(); } catch (_) {}
+  },
+
+  resume() {
+    manuallyPaused = false;
+    try { window.speechSynthesis?.resume(); } catch (_) {}
   },
 
   getVoices(lang) {

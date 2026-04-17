@@ -3,18 +3,19 @@ import { useNotifications } from './useNotifications.js';
 import { voice } from '../voice/VoiceProvider.js';
 import { playSound } from '../voice/soundEngine.js';
 import { reminderService } from '../services/reminderService.js';
+import { areSystemReminderNotificationsManagedNatively, syncAllNativeReminders } from '../services/nativeReminderService.js';
 import useAuthStore from '../store/authStore.js';
 import useReminderStore from '../store/reminderStore.js';
 
-const POLL_INTERVAL = 30_000; // 30 seconds
-const MISSED_WINDOW_MS = 30 * 60 * 1000; // 30 minutes
-const FIRE_COOLDOWN_MS = 60_000; // Don't re-fire same reminder within 1 min
+const POLL_INTERVAL = 30_000;
+const MISSED_WINDOW_MS = 30 * 60 * 1000;
+const FIRE_COOLDOWN_MS = 60_000;
 
 export function useReminderScheduler() {
   const { isAuthenticated } = useAuthStore();
-  const firedRef = useRef(new Map()); // id → timestamp
+  const firedRef = useRef(new Map());
   const { show: showNotification } = useNotifications();
-  const updateReminder = useReminderStore((s) => s.updateReminder);
+  const updateReminder = useReminderStore((state) => state.updateReminder);
 
   const fireReminder = useCallback(async (reminder) => {
     const id = reminder._id;
@@ -23,33 +24,32 @@ export function useReminderScheduler() {
 
     firedRef.current.set(id, Date.now());
 
-    // Browser notification
-    showNotification(reminder.title, {
-      body: [reminder.guestName, reminder.description].filter(Boolean).join(' — '),
-      requireInteraction: reminder.priority === 'urgent',
-      url: `/reminders/${id}`,
-    });
+    if (!areSystemReminderNotificationsManagedNatively()) {
+      showNotification(reminder.title, {
+        body: [reminder.guestName, reminder.description].filter(Boolean).join(' - '),
+        requireInteraction: reminder.priority === 'urgent',
+        url: `/reminders/${id}`,
+      });
+    }
 
-    // Sound
     if (reminder.soundEnabled !== false) {
       playSound(reminder.sound || 'chime');
     }
 
-    // Voice
     if (reminder.voiceEnabled !== false) {
       try {
         await voice.speakReminder(reminder);
       } catch {
-        /* silent */
+        // ignore voice failures
       }
     }
 
-    // Record trigger on server
     try {
       await reminderService.recordTrigger(id);
       updateReminder(id, { lastTriggeredAt: new Date().toISOString() });
+      await syncAllNativeReminders();
     } catch {
-      /* silent */
+      // ignore network failures
     }
   }, [showNotification, updateReminder]);
 
@@ -75,20 +75,18 @@ export function useReminderScheduler() {
         }
       }
     } catch {
-      /* network error — silently skip */
+      // ignore polling failures
     }
-  }, [isAuthenticated, fireReminder]);
+  }, [fireReminder, isAuthenticated]);
 
-  // Poll every 30 seconds
   useEffect(() => {
     if (!isAuthenticated) return;
 
     checkReminders();
     const intervalId = setInterval(checkReminders, POLL_INTERVAL);
     return () => clearInterval(intervalId);
-  }, [isAuthenticated, checkReminders]);
+  }, [checkReminders, isAuthenticated]);
 
-  // Check on tab visibility change (return from background)
   useEffect(() => {
     if (!isAuthenticated) return;
 
@@ -100,14 +98,16 @@ export function useReminderScheduler() {
 
     document.addEventListener('visibilitychange', handleVisibility);
     return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [isAuthenticated, checkReminders]);
+  }, [checkReminders, isAuthenticated]);
 
-  // Register service worker for future push support
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    syncAllNativeReminders().catch(() => {});
+  }, [isAuthenticated]);
+
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .catch(() => { /* sw optional */ });
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
     }
   }, []);
 }
