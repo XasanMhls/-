@@ -16,7 +16,8 @@
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBarLaunch"
             android:launchMode="singleTask"
-            android:exported="true">
+            android:exported="true"
+            android:showOnLockScreen="true">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,7 +26,38 @@
 
         </activity>
 
-        <!-- Override plugin receivers to explicitly set exported=false (required targeting API 31+) -->
+        <!-- ── Custom alarm components ───────────────────────────────────── -->
+
+        <!-- Receives AlarmManager broadcast; shows notification + starts TtsAlarmService -->
+        <receiver
+            android:name=".AlarmReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.chronos.reminder.ALARM" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Foreground service: plays ringtone + TTS when alarm fires -->
+        <service
+            android:name=".TtsAlarmService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
+        <!-- Re-schedules alarms after device reboot -->
+        <receiver
+            android:name=".BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <!-- HTC / OnePlus quick-boot -->
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+
+        <!-- ── Capacitor LocalNotifications overrides ────────────────────── -->
+        <!-- Required to set exported=false on API 31+ for Capacitor plugin receivers -->
         <receiver
             android:name="com.capacitorjs.plugins.localnotifications.TimedNotificationPublisher"
             android:exported="false"
@@ -42,23 +74,37 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths" />
         </provider>
     </application>
 
-    <!-- Permissions -->
+    <!-- ── Permissions ───────────────────────────────────────────────────── -->
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Show notifications (required on Android 13 / API 33+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- Exact alarms: USE_EXACT_ALARM is auto-granted on API 33+ for alarm/reminder apps.
          SCHEDULE_EXACT_ALARM is the fallback for API 31-32 (requires user grant in Settings). -->
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
-    <!-- Required for AlarmManager to wake the CPU and for vibration -->
+    <!-- Required for AlarmManager to wake the CPU -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <!-- Request exemption from battery optimization so AlarmManager and
-         BOOT_COMPLETED receiver survive on Samsung/Xiaomi/Huawei/OPPO -->
+    <!-- Foreground service for ringtone + TTS -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!-- Required on API 34+ when foregroundServiceType="mediaPlayback" -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
+    <!-- Full-screen intents to wake the lock screen (required on API 34+) -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+
+    <!-- Re-schedule alarms after device reboot -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- Exemption from battery optimization so alarms survive on Samsung/Xiaomi/Huawei/OPPO -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
 </manifest>
