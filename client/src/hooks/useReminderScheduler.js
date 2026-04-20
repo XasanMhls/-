@@ -4,6 +4,7 @@ import { voice } from '../voice/VoiceProvider.js';
 import { playSound } from '../voice/soundEngine.js';
 import { reminderService } from '../services/reminderService.js';
 import { areSystemReminderNotificationsManagedNatively, syncAllNativeReminders, ensureExactAlarmPermission } from '../services/nativeReminderService.js';
+import { subscribeToPush } from '../services/pushSubscriptionService.js';
 import useAuthStore from '../store/authStore.js';
 import useReminderStore from '../store/reminderStore.js';
 
@@ -109,9 +110,13 @@ export function useReminderScheduler() {
     ensureExactAlarmPermission().then(() => syncAllNativeReminders()).catch(() => {});
   }, [isAuthenticated]);
 
+  // Register service worker + subscribe to Web Push on login.
+  // Server will send push when a reminder is due — works even with
+  // screen off, browser tab closed, or phone locked.
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {});
-    }
-  }, []);
+    if (!('serviceWorker' in navigator)) return;
+    navigator.serviceWorker.register('/sw.js').then(() => {
+      if (isAuthenticated) subscribeToPush().catch(() => {});
+    }).catch(() => {});
+  }, [isAuthenticated]);
 }

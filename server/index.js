@@ -10,8 +10,11 @@ import authRoutes from './src/routes/auth.js';
 import reminderRoutes from './src/routes/reminders.js';
 import adminRoutes from './src/routes/admin.js';
 import ttsRoutes from './src/routes/tts.js';
+import pushRoutes from './src/routes/push.js';
 import { errorHandler, notFound } from './src/middleware/errorHandler.js';
 import { startAllAgents } from './src/agents/agentRunner.js';
+import { initWebPush } from './src/config/vapid.js';
+import { startPushScheduler } from './src/services/pushScheduler.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -53,6 +56,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/reminders', reminderRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/tts', ttsRoutes);
+app.use('/api/push', pushRoutes);
 
 app.get('/', (_req, res) => {
   res.json({ status: 'ok', service: 'Chronos API', uptime: process.uptime() });
@@ -131,6 +135,8 @@ connectDB().then(() => {
   });
 
   startAllAgents();
+  initWebPush();
+  startPushScheduler();
 
   // Only self-ping in production to avoid noise locally
   if (process.env.NODE_ENV === 'production') {
