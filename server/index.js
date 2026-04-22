@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import http from 'http';
+import https from 'https';
 import { connectDB } from './src/config/db.js';
 import authRoutes from './src/routes/auth.js';
 import reminderRoutes from './src/routes/reminders.js';
@@ -73,23 +74,35 @@ app.use(errorHandler);
 let keepAliveTimer = null;
 
 function startKeepAlive() {
-  const interval = 13 * 60 * 1000; // 13 min — safely under Render's 15-min sleep threshold
-  const host = process.env.SERVER_URL || `http://localhost:${PORT}`;
+  const interval = 4 * 60 * 1000; // 4 min — well under Render's 15-min sleep threshold
+  // MUST use the external Render URL (not localhost) so Render sees it as
+  // a real incoming request and does NOT put the service to sleep.
+  const externalUrl = process.env.SERVER_URL;
+  const localUrl = `http://localhost:${PORT}`;
+
+  if (!externalUrl) {
+    console.warn('[KeepAlive] SERVER_URL not set — pinging localhost only (may not prevent Render sleep).');
+  }
 
   keepAliveTimer = setInterval(() => {
-    const url = new URL('/api/health', host);
-    const req = http.get(url.toString(), (res) => {
-      let data = '';
-      res.on('data', chunk => { data += chunk; });
+    // Ping external URL first (keeps Render awake), fall back to localhost
+    const pingUrl = externalUrl
+      ? new URL('/api/health', externalUrl).toString()
+      : new URL('/api/health', localUrl).toString();
+
+    const mod = pingUrl.startsWith('https') ? https : http;
+    const req = mod.get(pingUrl, (res) => {
+      let body = '';
+      res.on('data', chunk => { body += chunk; });
       res.on('end', () => {
         console.log(`[KeepAlive] ping → ${res.statusCode} at ${new Date().toISOString()}`);
       });
     });
     req.on('error', err => console.warn('[KeepAlive] ping failed:', err.message));
-    req.setTimeout(8000, () => { req.destroy(); console.warn('[KeepAlive] ping timeout'); });
+    req.setTimeout(10000, () => { req.destroy(); console.warn('[KeepAlive] ping timeout'); });
   }, interval);
 
-  console.log('[KeepAlive] Self-ping every 13 min to stay awake.');
+  console.log(`[KeepAlive] Pinging ${externalUrl || localUrl} every 4 min to stay awake.`);
 }
 
 /* ── Graceful shutdown ── */
@@ -138,9 +151,16 @@ connectDB().then(() => {
   initWebPush();
   startPushScheduler();
 
-  // Only self-ping in production to avoid noise locally
-  if (process.env.NODE_ENV === 'production') {
+  // Keep-alive: always in production, also if SERVER_URL is set
+  if (process.env.NODE_ENV === 'production' || process.env.SERVER_URL) {
     startKeepAlive();
+  }
+
+  if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
+    console.error('[BOOT] ⚠ VAPID keys missing — Web Push will NOT work!');
+  }
+  if (!process.env.SERVER_URL && process.env.NODE_ENV === 'production') {
+    console.error('[BOOT] ⚠ SERVER_URL not set — keep-alive pings localhost (Render may sleep!)');
   }
 }).catch(err => {
   console.error('Failed to connect to MongoDB:', err.message);

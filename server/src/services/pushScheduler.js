@@ -42,6 +42,7 @@ async function tick() {
       if (lastSent && Date.now() - lastSent < COOLDOWN_MS) continue;
 
       const body = [r.guestName, r.description].filter(Boolean).join(' — ') || 'Время пришло!';
+      console.log(`[PushScheduler] Sending push for "${r.title}" (${r._id}) to user ${r.user}`);
       await sendPushToUser(r.user, {
         title: r.title,
         body,

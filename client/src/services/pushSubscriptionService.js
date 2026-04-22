@@ -19,10 +19,22 @@ export async function subscribeToPush() {
   }
 
   try {
-    // 1. Get SW registration
+    // 1. Request notification permission (required before push subscribe on mobile)
+    if (Notification.permission === 'default') {
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') {
+        console.warn('[Push] Notification permission denied');
+        return null;
+      }
+    } else if (Notification.permission === 'denied') {
+      console.warn('[Push] Notification permission blocked by user');
+      return null;
+    }
+
+    // 2. Get SW registration
     const registration = await navigator.serviceWorker.ready;
 
-    // 2. Fetch VAPID public key
+    // 3. Fetch VAPID public key
     const { data } = await api.get('/push/vapid-key');
     if (!data.publicKey) {
       console.warn('[Push] Server has no VAPID key');
@@ -31,7 +43,7 @@ export async function subscribeToPush() {
 
     const appServerKey = urlBase64ToUint8Array(data.publicKey);
 
-    // 3. Check if already subscribed
+    // 4. Check if already subscribed
     let subscription = await registration.pushManager.getSubscription();
 
     if (subscription) {
@@ -47,13 +59,13 @@ export async function subscribeToPush() {
       subscription = null;
     }
 
-    // 4. Subscribe
+    // 5. Subscribe
     subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: appServerKey,
     });
 
-    // 5. Send to server
+    // 6. Send to server
     await sendSubscriptionToServer(subscription);
     console.log('[Push] Subscribed successfully');
     return subscription;
