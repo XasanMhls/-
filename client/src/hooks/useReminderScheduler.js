@@ -4,7 +4,7 @@ import { voice } from '../voice/VoiceProvider.js';
 import { playSound } from '../voice/soundEngine.js';
 import { reminderService } from '../services/reminderService.js';
 import { areSystemReminderNotificationsManagedNatively, syncAllNativeReminders, ensureExactAlarmPermission } from '../services/nativeReminderService.js';
-import { subscribeToPush } from '../services/pushSubscriptionService.js';
+import { subscribeToPush, ensurePushSubscription } from '../services/pushSubscriptionService.js';
 import useAuthStore from '../store/authStore.js';
 import useReminderStore from '../store/reminderStore.js';
 
@@ -97,6 +97,8 @@ export function useReminderScheduler() {
         // Re-sync alarms every time app comes to foreground —
         // catches any changes made while app was in background.
         syncAllNativeReminders().catch(() => {});
+        // Re-subscribe push in case subscription expired while in background
+        ensurePushSubscription().catch(() => {});
       }
     };
 

@@ -14,7 +14,11 @@ export async function sendPushToUser(userId, payload) {
       webpush.sendNotification(
         { endpoint: sub.endpoint, keys: sub.keys },
         JSON.stringify(payload),
-        { TTL: 86400 }, // deliver within 24h
+        {
+          TTL: 86400,          // deliver within 24h
+          urgency: 'high',     // wake device from Doze / battery saver
+          topic: payload.reminderId || 'chronos-reminder',
+        },
       )
     )
   );

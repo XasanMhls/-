@@ -14,6 +14,12 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Register service worker as early as possible for reliable push delivery -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(function() {});
+      }
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

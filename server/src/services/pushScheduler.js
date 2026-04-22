@@ -1,8 +1,8 @@
 import Reminder from '../models/Reminder.js';
 import { sendPushToUser } from './webPushService.js';
 
-const POLL_MS        = 30_000;   // check every 30 s
-const WINDOW_MS      = 60_000;   // don't send if > 60 s past (avoid flood on restart)
+const POLL_MS        = 20_000;   // check every 20 s (more responsive)
+const WINDOW_MS      = 5 * 60_000; // 5-min window — catches reminders missed during brief downtime
 const COOLDOWN_MS    = 90_000;   // don't re-push the same reminder within 90 s
 
 // In-memory set: `reminderId:effectiveAt` → last push timestamp
@@ -62,7 +62,7 @@ let timer = null;
 
 export function startPushScheduler() {
   if (timer) return;
-  console.log('[PushScheduler] Started — polling every 30 s');
+  console.log('[PushScheduler] Started — polling every 20 s');
   tick(); // run immediately
   timer = setInterval(tick, POLL_MS);
 }

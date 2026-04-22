@@ -22,25 +22,35 @@ export async function subscribeToPush() {
     // 1. Get SW registration
     const registration = await navigator.serviceWorker.ready;
 
-    // 2. Check if already subscribed
-    let subscription = await registration.pushManager.getSubscription();
-    if (subscription) {
-      // Still send to server in case it was lost (e.g. new account)
-      await sendSubscriptionToServer(subscription);
-      return subscription;
-    }
-
-    // 3. Fetch VAPID public key
+    // 2. Fetch VAPID public key
     const { data } = await api.get('/push/vapid-key');
     if (!data.publicKey) {
       console.warn('[Push] Server has no VAPID key');
       return null;
     }
 
+    const appServerKey = urlBase64ToUint8Array(data.publicKey);
+
+    // 3. Check if already subscribed
+    let subscription = await registration.pushManager.getSubscription();
+
+    if (subscription) {
+      // Validate that the subscription is still alive — if the endpoint
+      // changed or the key rotated, unsubscribe and re-create.
+      const isValid = await validateSubscription(subscription);
+      if (isValid) {
+        await sendSubscriptionToServer(subscription);
+        return subscription;
+      }
+      // Stale — unsubscribe and fall through to create a new one
+      try { await subscription.unsubscribe(); } catch { /* ignore */ }
+      subscription = null;
+    }
+
     // 4. Subscribe
     subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(data.publicKey),
+      applicationServerKey: appServerKey,
     });
 
     // 5. Send to server
@@ -66,6 +76,30 @@ export async function unsubscribeFromPush() {
   }
 }
 
+/**
+ * Re-subscribe if subscription expired or is missing.
+ * Call this on every app focus / visibility change.
+ */
+export async function ensurePushSubscription() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  if (Notification.permission !== 'granted') return;
+
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.getSubscription();
+
+    if (!subscription) {
+      // Subscription gone (expired, cleared) — re-create
+      await subscribeToPush();
+    } else {
+      // Still exists — sync with server
+      await sendSubscriptionToServer(subscription);
+    }
+  } catch {
+    // Ignore — will retry on next visibility change
+  }
+}
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 async function sendSubscriptionToServer(subscription) {
@@ -74,6 +108,18 @@ async function sendSubscriptionToServer(subscription) {
     endpoint: raw.endpoint,
     keys: raw.keys,
   });
+}
+
+async function validateSubscription(subscription) {
+  try {
+    // If expirationTime is set and in the past, subscription is dead
+    if (subscription.expirationTime && subscription.expirationTime < Date.now()) {
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function urlBase64ToUint8Array(base64String) {

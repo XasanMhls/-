@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chronos-v2';
+const CACHE_NAME = 'chronos-v3';
 const STATIC_ASSETS = ['/', '/index.html'];
 
 // ── Install / Activate ────────────────────────────────────────────────────
@@ -41,13 +41,24 @@ self.addEventListener('fetch', (event) => {
 // ── Web Push ──────────────────────────────────────────────────────────────
 // Server sends push via web-push library when a reminder is due.
 // This fires even when the browser tab is closed and the phone screen is off.
+//
+// CRITICAL: Chrome REQUIRES every push event to show a visible notification.
+// If we don't, Chrome will show a generic fallback and may revoke the
+// push subscription entirely. Always show a notification, even on error.
 
 self.addEventListener('push', (event) => {
-  if (!event.data) return;
-
-  let data;
-  try { data = event.data.json(); }
-  catch { data = { title: 'Chronos', body: event.data.text() }; }
+  let data = {};
+  try {
+    if (event.data) {
+      data = event.data.json();
+    }
+  } catch {
+    try {
+      data = { title: 'Chronos', body: event.data ? event.data.text() : '' };
+    } catch {
+      data = {};
+    }
+  }
 
   const title = data.title || 'Напоминание';
   const options = {
@@ -57,6 +68,7 @@ self.addEventListener('push', (event) => {
     tag:     data.reminderId || 'chronos-reminder',
     renotify: true,                              // re-alert even if same tag
     requireInteraction: true,                     // stay until dismissed
+    silent:  false,                               // force sound/vibration on Android
     vibrate: [300, 100, 300, 100, 300],           // strong vibration pattern
     data:    { url: data.url || '/' },
     actions: [
@@ -79,7 +91,6 @@ self.addEventListener('notificationclick', (event) => {
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-      // If there's already an open tab, focus it and navigate
       for (const client of windowClients) {
         if (client.url.includes(self.location.origin)) {
           client.focus();
@@ -87,8 +98,39 @@ self.addEventListener('notificationclick', (event) => {
           return;
         }
       }
-      // Otherwise open a new window
       return clients.openWindow(url);
     })
+  );
+});
+
+// ── Push subscription change ──────────────────────────────────────────────
+// Fired when the push subscription expires or is invalidated by the browser.
+// Re-subscribe automatically so the user never misses a notification.
+
+self.addEventListener('pushsubscriptionchange', (event) => {
+  event.waitUntil(
+    (async () => {
+      try {
+        const oldSub = event.oldSubscription;
+        const newSub = await self.registration.pushManager.subscribe(
+          oldSub ? { userVisibleOnly: true, applicationServerKey: oldSub.options.applicationServerKey }
+                 : { userVisibleOnly: true }
+        );
+
+        // Send new subscription to backend (public endpoint, no auth needed)
+        const raw = newSub.toJSON();
+        await fetch('/api/push/resubscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            oldEndpoint: oldSub ? oldSub.endpoint : null,
+            endpoint: raw.endpoint,
+            keys: raw.keys,
+          }),
+        });
+      } catch (err) {
+        console.error('[SW] pushsubscriptionchange re-subscribe failed:', err);
+      }
+    })()
   );
 });
